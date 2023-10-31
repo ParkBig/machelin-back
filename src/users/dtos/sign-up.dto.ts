@@ -1,7 +1,7 @@
 import { IsEmail, IsString } from 'class-validator';
 import { CommonOutput } from 'src/common/dtos/output.dto';
 
-export class CreateAccountInput {
+export class SignUpInput {
   @IsEmail()
   email: string;
 
@@ -12,4 +12,4 @@ export class CreateAccountInput {
   nickName: string;
 }
 
-export class CreateAccountOutput extends CommonOutput {}
+export class SignUpOutput extends CommonOutput {}

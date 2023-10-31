@@ -1,17 +1,14 @@
-import {
-  MiddlewareConsumer,
-  Module,
-  NestModule,
-  RequestMethod,
-} from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import * as Joi from 'joi';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
-import { User } from './users/entities/user.entitu';
 import { JwtModule } from './jwt/jwt.module';
-import { JwtMiddleware } from './jwt/jwt.middleware';
+import { User } from './users/entities/user.entity';
+import { PostsModule } from './posts/posts.module';
+import { RestaurantsModule } from './restaurants/restaurants.module';
+import { Post } from './posts/entities/post.entity';
 
 @Module({
   imports: [
@@ -27,6 +24,7 @@ import { JwtMiddleware } from './jwt/jwt.middleware';
         POSTGRES_PASSWORD: Joi.string().required(),
         POSTGRES_NAME: Joi.string().required(),
         PRIVATE_KEY: Joi.string().required(),
+        GOOGLE_KEY: Joi.string().required(),
       }),
     }),
     TypeOrmModule.forRoot({
@@ -39,13 +37,15 @@ import { JwtMiddleware } from './jwt/jwt.middleware';
       synchronize: process.env.NODE_ENV !== 'prod',
       logging:
         process.env.NODE_ENV !== 'prod' && process.env.NODE_ENV !== 'test',
-      entities: [User], // DB의 스키마의 테이블에 엔티티생성
+      entities: [User, Post], // DB의 스키마의 테이블에 엔티티생성
     }),
     JwtModule.forRoot({
       privateKey: process.env.PRIVATE_KEY,
     }),
     AuthModule,
     UsersModule,
+    PostsModule,
+    RestaurantsModule,
   ],
   controllers: [],
   providers: [],

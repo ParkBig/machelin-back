@@ -4,6 +4,7 @@ import {
   BeforeUpdate,
   Column,
   CreateDateColumn,
+  DeleteDateColumn,
   Entity,
   OneToMany,
   PrimaryGeneratedColumn,
@@ -11,14 +12,30 @@ import {
 } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { InternalServerErrorException } from '@nestjs/common';
+import { Post } from 'src/posts/entities/post.entity';
+import { ConfigService } from '@nestjs/config';
+import { DEFAULT_IMAGE } from 'src/const/default';
 
 export enum UserRole {
   admin = 'ADMIN',
   user = 'USER',
 }
 
+export interface Bookmark {
+  id: string;
+  lat: number;
+  lng: number;
+  restaurantName: string;
+  img: string;
+  address: string;
+  rating: number;
+  totalUserRatings: number;
+}
+
 @Entity()
 export class User {
+  constructor(private readonly config: ConfigService) {}
+
   @PrimaryGeneratedColumn()
   id: number;
 
@@ -28,9 +45,16 @@ export class User {
   @UpdateDateColumn()
   updatedAt: Date;
 
-  @Column({ type: 'enum', enum: UserRole })
+  @DeleteDateColumn()
+  deletedAt: Date | null;
+
+  @Column({ type: 'enum', enum: UserRole, default: UserRole.user })
   @IsEnum(UserRole)
   role: UserRole;
+
+  @Column({ default: false })
+  @IsBoolean()
+  verified: boolean;
 
   @Column()
   @IsEmail()
@@ -42,23 +66,25 @@ export class User {
   @Column()
   nickName: string;
 
-  @Column()
-  @IsBoolean()
-  verified: boolean;
+  @Column({
+    default: DEFAULT_IMAGE,
+  })
+  pfp: string;
 
-  @Column()
-  rank: number;
+  @Column({ default: '초급 모험가' })
+  rank: string;
+
+  @Column('text', { array: true, default: [] })
+  follows: string[];
 
   @Column('text', { array: true, default: [] })
   followers: string[];
 
-  // 나중에 타입바꿔줘야함 => 레스토랑id, 레스토랑이름
   @Column('text', { array: true, default: [] })
   bookmarks: string[];
 
-  // 릴레이션으로
-  // @OneToMany()
-  // posts:
+  @OneToMany((type) => Post, (post) => post.owner)
+  posts: Post[];
 
   @BeforeInsert()
   @BeforeUpdate()

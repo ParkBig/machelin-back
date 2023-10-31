@@ -1,6 +1,6 @@
 import { IsNumber } from 'class-validator';
 import { CommonOutput } from 'src/common/dtos/output.dto';
-import { User } from '../entities/user.entitu';
+import { User } from '../entities/user.entity';
 
 export class UserProfileInput {
   @IsNumber()
