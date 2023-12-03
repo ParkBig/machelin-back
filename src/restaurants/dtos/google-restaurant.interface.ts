@@ -36,7 +36,7 @@ interface Photo {
   width: number;
 }
 
-export interface DetailRestaurant {
+export interface RestaurantDetail {
   address_components: AddressComponent[];
   adr_address: string;
   business_status: string;

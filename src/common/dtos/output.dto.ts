@@ -5,7 +5,7 @@ export class CommonOutput {
   ok: boolean;
 
   @IsString()
-  msg?: string;
+  msg: string;
 
   @IsString()
   error?: string;

@@ -9,6 +9,15 @@ import { User } from './users/entities/user.entity';
 import { PostsModule } from './posts/posts.module';
 import { RestaurantsModule } from './restaurants/restaurants.module';
 import { Post } from './posts/entities/post.entity';
+import { BookmarksModule } from './bookmarks/bookmarks.module';
+import { CommentsModule } from './comments/comments.module';
+import { Comment } from './comments/entities/comment.entity';
+import { TwilioModule } from './twilio/twilio.module';
+import { Like } from './posts/entities/like.entity';
+import { Dislike } from './posts/entities/dislike.entity';
+import { Report } from './posts/entities/report.entity';
+import { S3ServiceModule } from './s3-service/s3-service.module';
+import { Bookmark } from './bookmarks/entities/bookmark.entity';
 
 @Module({
   imports: [
@@ -23,8 +32,19 @@ import { Post } from './posts/entities/post.entity';
         POSTGRES_USERNAME: Joi.string().required(),
         POSTGRES_PASSWORD: Joi.string().required(),
         POSTGRES_NAME: Joi.string().required(),
-        PRIVATE_KEY: Joi.string().required(),
+        POSTGRES_PRIVATE_KEY: Joi.string().required(),
+        TWILIO_ACCOUNT_SID: Joi.string().required(),
+        TWILIO_AUTH_TOKEN: Joi.string().required(),
+        TWILIO_SERVICE_SID: Joi.string().required(),
+        AWS_REGION: Joi.string().required(),
+        AWS_ACCESS_KEY: Joi.string().required(),
+        AWS_SECRET_ACCESS_KEY: Joi.string().required(),
+        AWS_BUCKET_NAME: Joi.string().required(),
         GOOGLE_KEY: Joi.string().required(),
+        GOOGLE_NEARBY_SEARCH_URL: Joi.string().required(),
+        GOOGLE_DETAIL_SEARCH_URL: Joi.string().required(),
+        NCLOUD_CLIENT_ID: Joi.string().required(),
+        NCLOUD_CLIENT_SECRET: Joi.string().required(),
       }),
     }),
     TypeOrmModule.forRoot({
@@ -37,15 +57,19 @@ import { Post } from './posts/entities/post.entity';
       synchronize: process.env.NODE_ENV !== 'prod',
       logging:
         process.env.NODE_ENV !== 'prod' && process.env.NODE_ENV !== 'test',
-      entities: [User, Post], // DB의 스키마의 테이블에 엔티티생성
+      entities: [User, Post, Bookmark, Comment, Like, Report, Dislike], // DB의 스키마의 테이블에 엔티티생성
     }),
     JwtModule.forRoot({
-      privateKey: process.env.PRIVATE_KEY,
+      privateKey: process.env.POSTGRES_PRIVATE_KEY,
     }),
     AuthModule,
     UsersModule,
     PostsModule,
     RestaurantsModule,
+    BookmarksModule,
+    CommentsModule,
+    TwilioModule,
+    S3ServiceModule,
   ],
   controllers: [],
   providers: [],

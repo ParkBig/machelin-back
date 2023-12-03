@@ -1,17 +1,16 @@
+import { Comment } from 'src/comments/entities/comment.entity';
 import { User } from 'src/users/entities/user.entity';
 import {
   Column,
   CreateDateColumn,
   Entity,
   ManyToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-
-interface Comment {
-  pfp: string;
-  nickName: string;
-  comment: string;
-}
+import { Like } from './like.entity';
+import { Dislike } from './dislike.entity';
+import { Report } from './report.entity';
 
 @Entity()
 export class Post {
@@ -21,23 +20,41 @@ export class Post {
   @CreateDateColumn()
   createdAt: Date;
 
-  @Column()
-  title: string;
+  @Column({ nullable: true })
+  restaurantId: string;
+
+  @Column({ nullable: true })
+  restaurantName: string;
+
+  @Column({ nullable: true })
+  restaurantAddress: string;
+
+  @Column('text', { array: true, default: [] })
+  hashtags: string[];
+
+  @Column({ nullable: true })
+  rating: number;
+
+  @Column('text', { array: true, default: [] })
+  images: string[];
 
   @Column()
   contents: string;
 
-  @Column('text', { array: true, default: [] })
-  photos: string[];
+  @Column()
+  isPublic: boolean;
 
-  @Column('text', { array: true, default: [] })
+  @OneToMany((type) => Like, (like) => like.post, { eager: true })
+  likes: Like[];
+
+  @OneToMany((type) => Dislike, (like) => like.post, { eager: true })
+  dislikes: Dislike[];
+
+  @OneToMany((type) => Report, (report) => report.post, { eager: true })
+  report: Report;
+
+  @OneToMany((type) => Comment, (comment) => comment.postId, { eager: true })
   comments: Comment[];
-
-  @Column()
-  likes: number;
-
-  @Column()
-  report: number;
 
   @ManyToOne((type) => User, (user) => user.posts, {
     onDelete: 'CASCADE',

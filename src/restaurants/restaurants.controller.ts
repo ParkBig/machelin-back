@@ -1,13 +1,11 @@
-import { Body, Controller, Get, Query } from '@nestjs/common';
+import { Controller, Get, Query } from '@nestjs/common';
 import { RestaurantsService } from './restaurants.service';
 import {
   NearbyRestaurantsInput,
   NearbyRestaurantsOutput,
 } from './dtos/nearby-restaurants.dto';
-import {
-  DetailRestaurantInput,
-  DetailRestaurantOutput,
-} from './dtos/detail-restaurant.dto';
+import { RestaurantDetailOutput } from './dtos/restaurant-detail.dto';
+import { RestaurantPostsOutput } from './dtos/restaurant-posts.dto';
 
 @Controller('restaurants')
 export class restaurantsController {
@@ -15,29 +13,22 @@ export class restaurantsController {
 
   @Get('nearbyRestaurants')
   nearbyRestaurants(
-    @Query('lat') lat: string,
-    @Query('lng') lng: string,
-    @Query('radius') radius: string,
-    @Query('keyword') keyword: string,
+    @Query() nearbyRestaurantsInput: NearbyRestaurantsInput,
   ): Promise<NearbyRestaurantsOutput> {
-    return this.restaurantsService.nearbyRestaurants({
-      lat,
-      lng,
-      radius,
-      keyword,
-    });
+    return this.restaurantsService.nearbyRestaurants(nearbyRestaurantsInput);
   }
 
-  @Get('detailRestaurant')
-  detailRestaurant(
-    @Body() detailRestaurantInput: DetailRestaurantInput,
-  ): Promise<DetailRestaurantOutput> {
-    return this.restaurantsService.detailRestaurant(detailRestaurantInput);
+  @Get('restaurantDetail')
+  restaurantDetail(
+    @Query('restaurantId') restaurantId: string,
+  ): Promise<RestaurantDetailOutput> {
+    return this.restaurantsService.restaurantDetail(restaurantId);
   }
 
-  @Get('test')
-  test(@Query('test') test: string) {
-    console.log(test);
-    return 'hi';
+  @Get('restaurantPosts')
+  restaurantPosts(
+    @Query('restaurantId') restaurantId: string,
+  ): Promise<RestaurantPostsOutput> {
+    return this.restaurantsService.restaurantPosts(restaurantId);
   }
 }

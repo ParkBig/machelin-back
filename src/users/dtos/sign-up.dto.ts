@@ -9,7 +9,10 @@ export class SignUpInput {
   password: string;
 
   @IsString()
-  nickName: string;
+  nickname: string;
+
+  @IsString()
+  mobile: string;
 }
 
 export class SignUpOutput extends CommonOutput {}

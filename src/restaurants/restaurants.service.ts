@@ -1,74 +1,104 @@
 import { Injectable } from '@nestjs/common';
-import { HttpService } from '@nestjs/axios';
 import {
   NearbyRestaurantsInput,
   NearbyRestaurantsOutput,
 } from './dtos/nearby-restaurants.dto';
 import { ConfigService } from '@nestjs/config';
-import {
-  DetailRestaurantInput,
-  DetailRestaurantOutput,
-} from './dtos/detail-restaurant.dto';
+import axios from 'axios';
+import { RestaurantDetailOutput } from './dtos/restaurant-detail.dto';
+import { PostsService } from 'src/posts/posts.service';
+import { RestaurantPostsOutput } from './dtos/restaurant-posts.dto';
 
 @Injectable()
 export class RestaurantsService {
+  private readonly googleKey: string;
+  private readonly nearbySearchBaseUrl: string;
+  private readonly detailSearchBaseUrl: string;
+
   constructor(
-    private readonly config: ConfigService,
-    private readonly httpService: HttpService,
-  ) {}
+    private readonly configService: ConfigService,
+    private readonly postsService: PostsService,
+  ) {
+    this.googleKey = this.configService.get('GOOGLE_KEY');
+    this.nearbySearchBaseUrl = this.configService.get(
+      'GOOGLE_NEARBY_SEARCH_URL',
+    );
+    this.detailSearchBaseUrl = this.configService.get(
+      'GOOGLE_DETAIL_SEARCH_URL',
+    );
+  }
 
   async nearbyRestaurants({
     lat,
     lng,
     radius,
     keyword,
+    nextPageParams,
   }: NearbyRestaurantsInput): Promise<NearbyRestaurantsOutput> {
-    console.log(lat, lng, radius, keyword);
-    return { ok: true };
     try {
-      const googleKey = this.config.get('GOOGLE_KEY');
-      const url =
-        `https://maps.googleapis.com/maps/api/place/nearbysearch/json?` +
-        `location=${lat},${lng}&radius=${radius}&keyword=${keyword}&key=${googleKey}&language=ko`;
-      const response = await this.httpService.axiosRef.get(url);
-      const responseRestaurantsList = response.data.result;
-      const restaurantList = await Promise.all(
-        responseRestaurantsList.map(async (props) => ({
-          ...props,
-          photo: props.photos
-            ? await this.restaurantPhotos(props.photos[0].photo_reference)
-            : null,
-        })),
+      const params = {
+        location: `${lat},${lng}`,
+        radius,
+        keyword: keyword,
+        key: this.googleKey,
+        language: 'ko',
+      };
+      const toNextPageParams = nextPageParams
+        ? `&pagetoken=${nextPageParams}`
+        : '';
+      const queryString = new URLSearchParams(params).toString();
+      const requestUrl = `${this.nearbySearchBaseUrl}${queryString}${toNextPageParams}`;
+      const response = await axios.get(requestUrl);
+      const restaurants = response.data.results;
+
+      const hasNextPageToken = response.data.next_page_token
+        ? response.data.next_page_token
+        : null;
+
+      return {
+        ok: true,
+        msg: 'good work',
+        restaurants: restaurants,
+        next_page_token: hasNextPageToken,
+      };
+    } catch (error) {
+      return { ok: false, error, msg: '서버가 잠시 아픈거 같아요...' };
+    }
+  }
+
+  async restaurantDetail(
+    restaurantId: string,
+  ): Promise<RestaurantDetailOutput> {
+    try {
+      const params = {
+        place_id: restaurantId,
+        key: this.googleKey,
+        language: 'ko',
+      };
+      const queryString = new URLSearchParams(params).toString();
+      const requestUrl = `${this.detailSearchBaseUrl}${queryString}`;
+      const response = await axios.get(requestUrl);
+      const restaurantDetail = response.data.result;
+
+      return {
+        ok: true,
+        restaurantDetail: restaurantDetail,
+        msg: 'good work',
+      };
+    } catch (error) {
+      return { ok: false, error, msg: '서버가 잠시 아픈거 같아요...' };
+    }
+  }
+
+  async restaurantPosts(restaurantId: string): Promise<RestaurantPostsOutput> {
+    try {
+      const { restaurantPosts } = await this.postsService.findRestaurantPosts(
+        restaurantId,
       );
-      return { ok: true, msg: 'good work', restaurants: restaurantList };
+
+      return { ok: true, msg: 'good work', machelinPosts: restaurantPosts };
     } catch (error) {
-      return { ok: false, error };
-    }
-  }
-
-  async restaurantPhotos(photoReference: string): Promise<string | null> {
-    try {
-      const googleKey = this.config.get('GOOGLE_KEY');
-      const url = `https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photo_reference=${photoReference}&key=${googleKey}`;
-      const response = await this.httpService.axiosRef.get(url);
-
-      return response.request.responseURL;
-    } catch (error) {
-      return null;
-    }
-  }
-
-  async detailRestaurant({
-    placeId,
-  }: DetailRestaurantInput): Promise<DetailRestaurantOutput> {
-    try {
-      const googleKey = this.config.get('GOOGLE_KEY');
-      const url = `https://maps.googleapis.com/maps/api/place/details/json?place_id=${placeId}&key=${googleKey}&language=ko`;
-      const response = await this.httpService.axiosRef.get(url);
-
-      return response.data.result;
-    } catch (error) {
-      return { ok: false, error };
+      return { ok: false, error, msg: '서버가 잠시 아픈거 같아요...' };
     }
   }
 }

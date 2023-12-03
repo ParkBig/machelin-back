@@ -5,7 +5,8 @@ import {
   Get,
   Post,
   Query,
-  Res,
+  UploadedFile,
+  UseInterceptors,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { SignUpInput, SignUpOutput } from './dtos/sign-up.dto';
@@ -13,41 +14,82 @@ import { LoginInput, LoginOutput } from './dtos/login.dto';
 import { Role } from 'src/auth/role.decorator';
 import { AuthUser } from 'src/auth/auth-user.decorator';
 import { User } from './entities/user.entity';
-import { Response } from 'express';
-import { UserModifyInput, UserModifyOutput } from './dtos/user-modify.dto';
 import { WithdrawalOutput } from './dtos/withdrawal.dto';
 import { NicknameOutput } from './dtos/nickname.dto';
 import {
-  ToggleBookmarkStateInput,
-  ToggleBookmarkStateOutput,
-} from './dtos/toggle-bookmark-state';
-import { ToggleFriendStateOutput } from './dtos/toggle-friend-state.dto';
+  ToggleFriendStateInput,
+  ToggleFriendStateOutput,
+} from './dtos/toggle-friend-state.dto';
+import { MeOutput } from './dtos/me.dto';
+import { ExploreUserOutput } from './dtos/explore-user.dto';
+import { FileInterceptor } from '@nestjs/platform-express';
+import {
+  ModifyUserNicknameInput,
+  ModifyUserNicknameOutput,
+} from './dtos/modify-user-nickname.dto';
+import { CommonOutput } from 'src/common/dtos/output.dto';
+import {
+  ModifyUserActivityZoneInput,
+  ModifyUserActivityZoneOutput,
+} from './dtos/modify-user-activity-zone.dto';
+import {
+  ModifyUserPreferFoodInput,
+  ModifyUserPreferFoodOutput,
+} from './dtos/modify-user-prefer-food.dto';
+import { ModifyUserPreferRestaurantInput } from './dtos/modify-user-prefer-restaurant.dto';
+import { UsersFollowsOutput } from './dtos/users-follows.dto';
+import { UsersFollowersOutput } from './dtos/users-followers.dto';
+import {
+  CheckSignUpVerificationInput,
+  CheckSignUpVerificationOutput,
+} from './dtos/check-sign-up-verification.dto';
+import {
+  SendSignUpVerificationInput,
+  SendSignUpVerificationOutput,
+} from './dtos/send-sign-up-verification.dto';
+import {
+  SendFindMyIdVerificationInput,
+  SendFindMyIdVerificationOutput,
+} from './dtos/send-find-my-id-verification.dto';
+import {
+  CheckFindMyIdVerificationOutput,
+  CheckFindMyIdkVerificationInput,
+} from './dtos/check-find-my-id-verification.dto';
 
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
-  // 정보 조회하기
-  // 팔로우 하기, 취소하기
-
-  @Get()
-  isWork(@Res() res: Response) {
-    return res.status(200).send('hello it`s good work!');
-  }
-
+  // Get~
   @Get('me')
   @Role(['Any'])
-  me(@AuthUser() authUser: User) {
-    if (!authUser) return { ok: false, authUser: null };
-    return { ok: true, authUser };
+  me(@AuthUser() authUser: User): Promise<MeOutput> {
+    return this.usersService.me(authUser);
   }
 
-  @Get('findUser')
-  @Role(['Any'])
-  findUser(@Query('nickName') nickNameInput: string): Promise<NicknameOutput> {
-    return this.usersService.findUser(nickNameInput);
+  @Get('findUsers')
+  findUsers(@Query('nickname') nicknameInput: string): Promise<NicknameOutput> {
+    return this.usersService.findUsers(nicknameInput);
   }
 
+  @Get('exploreUser')
+  exploreUser(@Query('userId') userId: number): Promise<ExploreUserOutput> {
+    return this.usersService.exploreUser(userId);
+  }
+
+  @Get('usersFollows')
+  usersFollows(@Query('userId') userId: number): Promise<UsersFollowsOutput> {
+    return this.usersService.usersFollows(userId);
+  }
+
+  @Get('usersFollowers')
+  usersFollowers(
+    @Query('userId') userId: number,
+  ): Promise<UsersFollowersOutput> {
+    return this.usersService.usersFollowers(userId);
+  }
+
+  // Post~
   @Post('signUp')
   signUp(@Body() signUpInput: SignUpInput): Promise<SignUpOutput> {
     return this.usersService.signUp(signUpInput);
@@ -58,24 +100,97 @@ export class UsersController {
     return this.usersService.login(loginInput);
   }
 
-  @Post('modifyUserInfo')
-  @Role(['Any'])
-  modifyUserInfo(
-    @AuthUser() authUser: User,
-    @Body() userModifyInput: UserModifyInput,
-  ): Promise<UserModifyOutput> {
-    return this.usersService.modifyUserInfo(authUser, userModifyInput);
+  @Post('sendSignUpVerification')
+  sendSignUpVerification(
+    @Body() sendSignUpVerificationInput: SendSignUpVerificationInput,
+  ): Promise<SendSignUpVerificationOutput> {
+    return this.usersService.sendSignUpVerification(
+      sendSignUpVerificationInput,
+    );
   }
 
-  @Post('toggleBookmarkState')
+  @Post('checkSignUpVerification')
+  checkSignUpVerification(
+    @Body() checkSignUpVerificationInput: CheckSignUpVerificationInput,
+  ): Promise<CheckSignUpVerificationOutput> {
+    return this.usersService.checkSignUpVerification(
+      checkSignUpVerificationInput,
+    );
+  }
+
+  @Post('sendFindMyIdVerification')
+  sendFindMyIdVerification(
+    @Body() sendFindMyIdVerificationInput: SendFindMyIdVerificationInput,
+  ): Promise<SendFindMyIdVerificationOutput> {
+    return this.usersService.sendFindMyIdVerification(
+      sendFindMyIdVerificationInput,
+    );
+  }
+
+  @Post('checkFindMyIdVerification')
+  checkFindMyIdVerification(
+    @Body() checkFindMyIdkVerificationInput: CheckFindMyIdkVerificationInput,
+  ): Promise<CheckFindMyIdVerificationOutput> {
+    return this.usersService.checkFindMyIdVerification(
+      checkFindMyIdkVerificationInput,
+    );
+  }
+
+  @Post('modifyUserImage')
   @Role(['Any'])
-  toggleBookmarkState(
+  @UseInterceptors(FileInterceptor('image'))
+  modifyUserImage(
     @AuthUser() authUser: User,
-    @Body() toggleBookmarkStateInput: ToggleBookmarkStateInput,
-  ): Promise<ToggleBookmarkStateOutput> {
-    return this.usersService.toggleBookmarkState(
+    @UploadedFile() image: Express.Multer.File,
+  ): Promise<CommonOutput> {
+    return this.usersService.modifyUserImage(authUser, image);
+  }
+
+  @Post('modifyUserNickname')
+  @Role(['Any'])
+  modifyUserNickname(
+    @AuthUser() authUser: User,
+    @Body() modifyUserNicknameInput: ModifyUserNicknameInput,
+  ): Promise<ModifyUserNicknameOutput> {
+    return this.usersService.modifyUserNickname(
       authUser,
-      toggleBookmarkStateInput,
+      modifyUserNicknameInput,
+    );
+  }
+
+  @Post('modifyUserActivityZone')
+  @Role(['Any'])
+  modifyUserActivityZone(
+    @AuthUser() authUser: User,
+    @Body() modifyUserActivityZoneInput: ModifyUserActivityZoneInput,
+  ): Promise<ModifyUserActivityZoneOutput> {
+    return this.usersService.modifyUserActivityZone(
+      authUser,
+      modifyUserActivityZoneInput,
+    );
+  }
+
+  @Post('modifyUserPreferFood')
+  @Role(['Any'])
+  modifyUserPreferFood(
+    @AuthUser() authUser: User,
+    @Body() modifyUserPreferFoodInput: ModifyUserPreferFoodInput,
+  ): Promise<ModifyUserPreferFoodOutput> {
+    return this.usersService.modifyUserPreferFood(
+      authUser,
+      modifyUserPreferFoodInput,
+    );
+  }
+
+  @Post('modifyUserPreferRestaurant')
+  @Role(['Any'])
+  modifyUserPreferRestaurant(
+    @AuthUser() authUser: User,
+    @Body() modifyUserPreferRestaurantInput: ModifyUserPreferRestaurantInput,
+  ) {
+    return this.usersService.modifyUserPreferRestaurant(
+      authUser,
+      modifyUserPreferRestaurantInput,
     );
   }
 
@@ -83,7 +198,7 @@ export class UsersController {
   @Role(['Any'])
   toggleFriendState(
     @AuthUser() authUser: User,
-    @Body() toggleFriendStateInput: User,
+    @Body() toggleFriendStateInput: ToggleFriendStateInput,
   ): Promise<ToggleFriendStateOutput> {
     return this.usersService.toggleFriendState(
       authUser,

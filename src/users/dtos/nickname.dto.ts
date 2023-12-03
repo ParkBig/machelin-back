@@ -4,7 +4,7 @@ import { User } from '../entities/user.entity';
 
 export class NicknameInput {
   @IsString()
-  nickName: string;
+  nickname: string;
 }
 
 export class NicknameOutput extends CommonOutput {

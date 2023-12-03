@@ -1,4 +1,4 @@
-import { IsString } from 'class-validator';
+import { IsOptional, IsString } from 'class-validator';
 import { CommonOutput } from 'src/common/dtos/output.dto';
 import { responseRestaurant } from './google-restaurant.interface';
 
@@ -14,8 +14,12 @@ export class NearbyRestaurantsInput {
 
   @IsString()
   keyword: string;
+
+  @IsOptional()
+  nextPageParams: string;
 }
 
 export class NearbyRestaurantsOutput extends CommonOutput {
   restaurants?: responseRestaurant[];
+  next_page_token?: string;
 }

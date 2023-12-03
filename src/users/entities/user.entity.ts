@@ -1,11 +1,12 @@
-import { IsBoolean, IsEmail, IsEnum } from 'class-validator';
+import { IsEmail, IsEnum } from 'class-validator';
 import {
   BeforeInsert,
-  BeforeUpdate,
   Column,
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
+  JoinTable,
+  ManyToMany,
   OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
@@ -13,29 +14,19 @@ import {
 import * as bcrypt from 'bcrypt';
 import { InternalServerErrorException } from '@nestjs/common';
 import { Post } from 'src/posts/entities/post.entity';
-import { ConfigService } from '@nestjs/config';
-import { DEFAULT_IMAGE } from 'src/const/default';
+import { Comment } from 'src/comments/entities/comment.entity';
+import { Dislike } from 'src/posts/entities/dislike.entity';
+import { Like } from 'src/posts/entities/like.entity';
+import { Report } from 'src/posts/entities/report.entity';
+import { Bookmark } from 'src/bookmarks/entities/bookmark.entity';
 
 export enum UserRole {
   admin = 'ADMIN',
   user = 'USER',
 }
 
-export interface Bookmark {
-  id: string;
-  lat: number;
-  lng: number;
-  restaurantName: string;
-  img: string;
-  address: string;
-  rating: number;
-  totalUserRatings: number;
-}
-
 @Entity()
 export class User {
-  constructor(private readonly config: ConfigService) {}
-
   @PrimaryGeneratedColumn()
   id: number;
 
@@ -52,9 +43,8 @@ export class User {
   @IsEnum(UserRole)
   role: UserRole;
 
-  @Column({ default: false })
-  @IsBoolean()
-  verified: boolean;
+  @Column()
+  mobile: string;
 
   @Column()
   @IsEmail()
@@ -64,30 +54,54 @@ export class User {
   password: string;
 
   @Column()
-  nickName: string;
+  nickname: string;
 
-  @Column({
-    default: DEFAULT_IMAGE,
-  })
+  @Column({ nullable: true })
   pfp: string;
 
   @Column({ default: '초급 모험가' })
   rank: string;
 
-  @Column('text', { array: true, default: [] })
-  follows: string[];
+  @Column({ nullable: true })
+  activityZone: string;
 
   @Column('text', { array: true, default: [] })
-  followers: string[];
+  preferFoods: string[];
+
+  @Column({ nullable: true })
+  preferRestaurant: string;
 
   @Column('text', { array: true, default: [] })
-  bookmarks: string[];
+  medalsEarned: string[];
+
+  @ManyToMany((type) => User)
+  @JoinTable()
+  follows: User[];
+
+  @ManyToMany((type) => User)
+  @JoinTable()
+  followers: User[];
 
   @OneToMany((type) => Post, (post) => post.owner)
   posts: Post[];
 
+  @OneToMany((type) => Bookmark, (bookmark) => bookmark.owner)
+  bookmarks: Bookmark[];
+
+  @OneToMany((type) => Comment, (comment) => comment.owner)
+  comments: Comment[];
+
+  @OneToMany((type) => Like, (like) => like.owner)
+  likes: Like[];
+
+  @OneToMany((type) => Dislike, (like) => like.owner, { eager: true })
+  dislikes: Dislike[];
+
+  @OneToMany((type) => Report, (report) => report.owner)
+  reports: Report[];
+
   @BeforeInsert()
-  @BeforeUpdate()
+  // @BeforeUpdate()
   async hashPassword(): Promise<void> {
     if (this.password) {
       try {

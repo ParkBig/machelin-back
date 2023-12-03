@@ -1,11 +1,10 @@
 import { Module } from '@nestjs/common';
-import { TypeOrmModule } from '@nestjs/typeorm';
 import { RestaurantsService } from './restaurants.service';
 import { restaurantsController } from './restaurants.controller';
-import { HttpModule } from '@nestjs/axios';
+import { PostsModule } from 'src/posts/posts.module';
 
 @Module({
-  imports: [HttpModule],
+  imports: [PostsModule],
   controllers: [restaurantsController],
   providers: [RestaurantsService],
 })

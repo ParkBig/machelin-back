@@ -4,49 +4,91 @@ import { Like, Repository } from 'typeorm';
 import { LoginInput, LoginOutput } from './dtos/login.dto';
 import { JwtService } from 'src/jwt/jwt.service';
 import { UserProfileOutput } from './dtos/user-profile.dto';
-import { Bookmark, User } from './entities/user.entity';
+import { User } from './entities/user.entity';
 import { SignUpInput, SignUpOutput } from './dtos/sign-up.dto';
-import { UserModifyInput, UserModifyOutput } from './dtos/user-modify.dto';
 import { WithdrawalOutput } from './dtos/withdrawal.dto';
-import { DEFAULT_IMAGE } from 'src/const/default';
 import { NicknameOutput } from './dtos/nickname.dto';
 import {
-  ToggleBookmarkStateInput,
-  ToggleBookmarkStateOutput,
-} from './dtos/toggle-bookmark-state';
-import { ToggleFriendStateOutput } from './dtos/toggle-friend-state.dto';
+  ToggleFriendStateInput,
+  ToggleFriendStateOutput,
+} from './dtos/toggle-friend-state.dto';
+import { MeOutput } from './dtos/me.dto';
+import { ExploreUserOutput } from './dtos/explore-user.dto';
+import {
+  ModifyUserNicknameInput,
+  ModifyUserNicknameOutput,
+} from './dtos/modify-user-nickname.dto';
+import { CommonOutput } from 'src/common/dtos/output.dto';
+import { S3ServiceService } from 'src/s3-service/s3-service.service';
+import {
+  ModifyUserActivityZoneInput,
+  ModifyUserActivityZoneOutput,
+} from './dtos/modify-user-activity-zone.dto';
+import {
+  ModifyUserPreferFoodInput,
+  ModifyUserPreferFoodOutput,
+} from './dtos/modify-user-prefer-food.dto';
+import {
+  ModifyUserPreferRestaurantInput,
+  ModifyUserPreferRestaurantOutput,
+} from './dtos/modify-user-prefer-restaurant.dto';
+import { UsersFollowsOutput } from './dtos/users-follows.dto';
+import { UsersFollowersOutput } from './dtos/users-followers.dto';
+import { TwilioService } from 'src/twilio/twilio.service';
+import {
+  CheckSignUpVerificationInput,
+  CheckSignUpVerificationOutput,
+} from './dtos/check-sign-up-verification.dto';
+import {
+  SendSignUpVerificationInput,
+  SendSignUpVerificationOutput,
+} from './dtos/send-sign-up-verification.dto';
+import {
+  SendFindMyIdVerificationInput,
+  SendFindMyIdVerificationOutput,
+} from './dtos/send-find-my-id-verification.dto';
+import {
+  CheckFindMyIdVerificationOutput,
+  CheckFindMyIdkVerificationInput,
+} from './dtos/check-find-my-id-verification.dto';
 
 @Injectable()
 export class UsersService {
   constructor(
-    @InjectRepository(User) private readonly users: Repository<User>,
+    private readonly s3ServiceService: S3ServiceService,
+    private readonly twilioService: TwilioService,
     private readonly jwtService: JwtService,
+    @InjectRepository(User) private readonly users: Repository<User>,
   ) {}
 
   async signUp({
     email,
     password,
-    nickName,
+    nickname,
+    mobile,
   }: SignUpInput): Promise<SignUpOutput> {
     try {
+      // 이메일 중복가능, 폰 중복체크해주기
       const existingUser = await this.users.findOne({
-        where: [{ email }, { nickName }],
+        where: [{ email }, { nickname }],
       });
 
       if (existingUser) {
         if (existingUser.email === email) {
           return { ok: false, msg: '이미 존재하는 이메일입니다.' };
         }
-        if (existingUser.nickName === nickName) {
+        if (existingUser.nickname === nickname) {
           return { ok: false, msg: '이미 존재하는 닉네임입니다.' };
         }
       }
 
-      await this.users.save(this.users.create({ email, password, nickName }));
+      await this.users.save(
+        this.users.create({ email, password, nickname, mobile }),
+      );
 
-      return { ok: true, msg: 'complete save id' };
+      return { ok: true, msg: 'good work' };
     } catch (error) {
-      return { ok: false, error };
+      return { ok: false, msg: '서버가 잠시 아픈거 같아요...', error };
     }
   }
 
@@ -62,9 +104,19 @@ export class UsersService {
 
       const token = this.jwtService.sign(user.id);
 
-      return { ok: true, token };
+      return { ok: true, msg: 'good work', token };
     } catch (error) {
-      return { ok: false, error };
+      return { ok: false, msg: '서버가 잠시 아픈거 같아요...', error };
+    }
+  }
+
+  async me(authUser: User): Promise<MeOutput> {
+    try {
+      if (!authUser) return { ok: false, authUser: null, msg: 'good work' };
+
+      return { ok: true, authUser, msg: 'good work' };
+    } catch (error) {
+      return { ok: false, error, msg: '서버가 잠시 아픈거 같아요...' };
     }
   }
 
@@ -72,151 +124,213 @@ export class UsersService {
     try {
       const user = await this.users.findOne({
         where: { id },
-        relations: ['posts'],
       });
-      return { ok: Boolean(user), user };
+      return { ok: Boolean(user), user, msg: 'good work' };
     } catch (error) {
-      return { ok: false, error };
+      return { ok: false, error, msg: '서버가 잠시 아픈거 같아요...' };
     }
   }
 
-  async toggleBookmarkState(
+  async modifyUserImage(
     authUser: User,
-    toggleBookmarkStateInput: ToggleBookmarkStateInput,
-  ): Promise<ToggleBookmarkStateOutput> {
-    try {
-      const user = await this.users.findOne({
-        where: { id: authUser.id },
-      });
-      if (!user) return { ok: false, msg: '잘못된 요청이네요' };
-
-      const isBookmarkHasIndex = user.bookmarks.findIndex((bookmark) => {
-        const parseBookmark: Bookmark = JSON.parse(bookmark);
-        return parseBookmark.id === toggleBookmarkStateInput.id;
-      });
-
-      if (isBookmarkHasIndex !== -1) {
-        user.bookmarks.splice(isBookmarkHasIndex, 1);
-      } else {
-        const jsonBookmarkInput = JSON.stringify(toggleBookmarkStateInput);
-        user.bookmarks.push(jsonBookmarkInput);
-      }
-
-      await this.users.save(user);
-
-      return { ok: true, msg: 'good work' };
-    } catch (error) {
-      return { ok: false, error };
-    }
-  }
-
-  async modifyUserInfo(
-    authUser: User,
-    userModifyInput: UserModifyInput,
-  ): Promise<UserModifyOutput> {
+    image: Express.Multer.File,
+  ): Promise<CommonOutput> {
     try {
       if (!authUser) {
-        return { ok: false, error: '뭔가 잘못된 요청이네요!' };
+        return { ok: false, msg: '잘못된 요청이에요!' };
       }
+
       const user = await this.users.findOne({ where: { id: authUser.id } });
-
       if (!user) {
-        return { ok: false, error: '존재하지 않는 유저입니다.' };
+        return { ok: false, msg: '잘못된 요청이에요!' };
       }
-      const { type, content } = userModifyInput;
 
-      if (type === 'pfp') {
-        if (content === 'default') {
-          user.pfp = DEFAULT_IMAGE;
-        } else {
-          user.pfp = content;
-        }
-      }
-      if (type === 'nickName') {
-        user.nickName = content;
-      }
-      if (type === 'email') {
-        const hasDuplicateEmail = await this.users.find({
-          where: { email: content },
-        });
-        if (hasDuplicateEmail.length) {
-          return { ok: false, error: '중복된 이메일입니다.' };
-        }
-        user.email = content;
+      if (image) {
+        const imageUrl = await this.s3ServiceService.uploadImage(image);
+        user.pfp = imageUrl;
+      } else {
+        user.pfp = null;
       }
 
       await this.users.save(user);
 
       return { ok: true, msg: 'good work' };
     } catch (error) {
-      return { ok: false, error };
+      return { ok: false, error, msg: '서버가 잠시 아픈거 같아요...' };
+    }
+  }
+
+  async modifyUserNickname(
+    authUser: User,
+    { changeNickname }: ModifyUserNicknameInput,
+  ): Promise<ModifyUserNicknameOutput> {
+    try {
+      if (!authUser) {
+        return { ok: false, msg: '잘못된 요청이에요!' };
+      }
+
+      const user = await this.users.findOne({ where: { id: authUser.id } });
+      if (!user) {
+        return { ok: false, msg: '잘못된 요청이에요!' };
+      }
+
+      user.nickname = changeNickname;
+
+      await this.users.save(user);
+
+      return { ok: true, msg: 'good work' };
+    } catch (error) {
+      return { ok: false, error, msg: '서버가 잠시 아픈거 같아요...' };
+    }
+  }
+
+  async modifyUserActivityZone(
+    authUser: User,
+    { changeActivityZone }: ModifyUserActivityZoneInput,
+  ): Promise<ModifyUserActivityZoneOutput> {
+    try {
+      if (!authUser) {
+        return { ok: false, msg: '잘못된 요청이에요!' };
+      }
+
+      const user = await this.users.findOne({ where: { id: authUser.id } });
+      if (!user) {
+        return { ok: false, msg: '잘못된 요청이에요!' };
+      }
+
+      user.activityZone = changeActivityZone;
+
+      await this.users.save(user);
+
+      return { ok: true, msg: 'good work' };
+    } catch (error) {
+      return { ok: false, error, msg: '서버가 잠시 아픈거 같아요...' };
+    }
+  }
+
+  async modifyUserPreferFood(
+    authUser: User,
+    { type, changePreferFood }: ModifyUserPreferFoodInput,
+  ): Promise<ModifyUserPreferFoodOutput> {
+    try {
+      if (!authUser) {
+        return { ok: false, msg: '잘못된 요청이에요!' };
+      }
+
+      const user = await this.users.findOne({ where: { id: authUser.id } });
+      if (!user) {
+        return { ok: false, msg: '잘못된 요청이에요!' };
+      }
+
+      if (type === 'add') {
+        user.preferFoods.push(changePreferFood);
+      } else {
+        const newPreferFoods = user.preferFoods.filter(
+          (preferFood) => preferFood !== changePreferFood,
+        );
+        user.preferFoods = newPreferFoods;
+      }
+
+      await this.users.save(user);
+
+      return { ok: true, msg: 'good work!' };
+    } catch (error) {
+      return { ok: false, error, msg: '서버가 잠시 아픈거 같아요...' };
+    }
+  }
+
+  async modifyUserPreferRestaurant(
+    authUser: User,
+    { changePreferRestaurant }: ModifyUserPreferRestaurantInput,
+  ): Promise<ModifyUserPreferRestaurantOutput> {
+    try {
+      if (!authUser) {
+        return { ok: false, msg: '잘못된 요청이에요!' };
+      }
+
+      const user = await this.users.findOne({ where: { id: authUser.id } });
+      if (!user) {
+        return { ok: false, msg: '잘못된 요청이에요!' };
+      }
+
+      user.preferRestaurant = changePreferRestaurant;
+
+      await this.users.save(user);
+
+      return { ok: true, msg: 'good work!' };
+    } catch (error) {
+      return { ok: false, error, msg: '서버가 잠시 아픈거 같아요...' };
     }
   }
 
   async withdrawal(authUser: User): Promise<WithdrawalOutput> {
     try {
       if (!authUser) {
-        return { ok: false, error: '뭔가 잘못된 요청이네요!' };
+        return { ok: false, msg: '잘못된 요청이에요!' };
       }
 
-      await this.users.softDelete({ email: authUser.email, deletedAt: null });
+      await this.users.softDelete({ id: authUser.id });
 
       return { ok: true, msg: 'good work!' };
     } catch (error) {
-      return { ok: false, error };
+      return { ok: false, error, msg: '서버가 잠시 아픈거 같아요...' };
     }
   }
 
-  async findUser(nickName: string): Promise<NicknameOutput> {
+  async findUsers(nickname: string): Promise<NicknameOutput> {
     try {
       const users = await this.users.find({
-        where: { nickName: Like(`%${nickName}%`) },
-        relations: ['posts'],
+        where: { nickname: Like(`%${nickname}%`) },
+        relations: ['follows', 'followers', 'bookmarks', 'posts'],
       });
 
-      return { ok: true, users };
+      return { ok: true, users, msg: 'good work' };
     } catch (error) {
-      return { ok: false, error };
+      return { ok: false, error, msg: '서버가 잠시 아픈거 같아요...' };
     }
   }
 
   async toggleFriendState(
     authUser: User,
-    toggleFriendStateInput: User,
+    { exploreUserId }: ToggleFriendStateInput,
   ): Promise<ToggleFriendStateOutput> {
     try {
       if (!authUser) {
-        return { ok: false, error: '뭔가 잘못된 요청이네요!' };
+        return { ok: false, msg: '잘못된 요청이에요!' };
       }
 
-      const user = await this.users.findOne({ where: { id: authUser.id } });
+      const user = await this.users.findOne({
+        where: { id: authUser.id },
+        relations: ['follows', 'followers'],
+      });
       const followTargetUser = await this.users.findOne({
-        where: { id: toggleFriendStateInput.id },
+        where: { id: exploreUserId },
+        relations: ['follows', 'followers'],
       });
       if (!user || !followTargetUser) {
         return { ok: false, msg: '잘못된 요청이네요' };
       }
 
-      const isFollowSoIndex = user.follows.findIndex((follow) => {
-        const parseFollow: User = JSON.parse(follow);
-        return parseFollow.id === toggleFriendStateInput.id;
-      });
+      if (!user.follows) {
+        user.follows = [];
+      }
+      if (!followTargetUser.followers) {
+        followTargetUser.followers = [];
+      }
+
+      const isFollowSoIndex = user.follows.findIndex(
+        (follow) => follow.id === exploreUserId,
+      );
       const isTargetUsersFollowerSoIndex = followTargetUser.followers.findIndex(
-        (follower) => {
-          const parseFollow: User = JSON.parse(follower);
-          return parseFollow.id === authUser.id;
-        },
+        (follower) => follower.id === authUser.id,
       );
 
       if (isFollowSoIndex !== -1) {
         user.follows.splice(isFollowSoIndex, 1);
         followTargetUser.followers.splice(isTargetUsersFollowerSoIndex, 1);
       } else {
-        const jsonFollow = JSON.stringify(toggleFriendStateInput);
-        user.follows.push(jsonFollow);
-
-        const jsonFollower = JSON.stringify(authUser);
-        followTargetUser.followers.push(jsonFollower);
+        user.follows.push(followTargetUser);
+        followTargetUser.followers.push(authUser);
       }
 
       await this.users.save(user);
@@ -224,7 +338,135 @@ export class UsersService {
 
       return { ok: true, msg: 'good work!' };
     } catch (error) {
-      return { ok: false, error };
+      return { ok: false, error, msg: '서버가 잠시 아픈거 같아요...' };
+    }
+  }
+
+  async exploreUser(userId: number): Promise<ExploreUserOutput> {
+    try {
+      const user = await this.users.findOne({
+        where: { id: userId },
+      });
+      if (!user) return { ok: false, msg: '잘못된 요청이네요' };
+
+      return { ok: true, exploreUser: user, msg: 'good work' };
+    } catch (error) {
+      return { ok: false, error, msg: '서버가 잠시 아픈거 같아요...' };
+    }
+  }
+
+  async usersFollows(userId: number): Promise<UsersFollowsOutput> {
+    try {
+      const user = await this.users.findOne({
+        where: { id: userId },
+        relations: [
+          'follows.bookmarks',
+          'follows.posts',
+          'follows.follows',
+          'follows.followers',
+        ],
+      });
+
+      return { ok: true, follows: user.follows, msg: 'good work' };
+    } catch (error) {
+      return { ok: false, error, msg: '서버가 잠시 아픈거 같아요...' };
+    }
+  }
+
+  async usersFollowers(userId: number): Promise<UsersFollowersOutput> {
+    try {
+      const user = await this.users.findOne({
+        where: { id: userId },
+        relations: [
+          'followers.bookmarks',
+          'followers.posts',
+          'followers.follows',
+          'followers.followers',
+        ],
+      });
+
+      return { ok: true, followers: user.followers, msg: 'good work' };
+    } catch (error) {
+      return { ok: false, error, msg: '서버가 잠시 아픈거 같아요...' };
+    }
+  }
+
+  async sendSignUpVerification({
+    phoneNumber,
+  }: SendSignUpVerificationInput): Promise<SendSignUpVerificationOutput> {
+    try {
+      const userExist = await this.users.findOne({
+        where: { mobile: phoneNumber },
+      });
+
+      if (userExist) {
+        return { ok: false, msg: '이미 이 전화번호로 유저가 존재합니다' };
+      }
+
+      const { ok, msg } = await this.twilioService.sendVerification({
+        phoneNumber,
+      });
+
+      return { ok, msg };
+    } catch (error) {
+      return { ok: false, error, msg: '서버가 잠시 아픈거 같아요...' };
+    }
+  }
+
+  async checkSignUpVerification(
+    checkSignupVerificationInput: CheckSignUpVerificationInput,
+  ): Promise<CheckSignUpVerificationOutput> {
+    try {
+      const { ok, msg } = await this.twilioService.checkVerification(
+        checkSignupVerificationInput,
+      );
+
+      return { ok, msg };
+    } catch (error) {
+      return { ok: false, error, msg: '서버가 잠시 아픈거 같아요...' };
+    }
+  }
+
+  async sendFindMyIdVerification({
+    phoneNumber,
+  }: SendFindMyIdVerificationInput): Promise<SendFindMyIdVerificationOutput> {
+    try {
+      const user = await this.users.findOne({ where: { mobile: phoneNumber } });
+      if (!user) {
+        return { ok: false, msg: '해당 번호로 등록된 유저가 없습니다' };
+      }
+
+      const { ok, msg } = await this.twilioService.sendVerification({
+        phoneNumber,
+      });
+
+      return { ok, msg };
+    } catch (error) {
+      return { ok: false, error, msg: '서버가 잠시 아픈거 같아요...' };
+    }
+  }
+
+  async checkFindMyIdVerification(
+    checkFindMyIdkVerificationInput: CheckFindMyIdkVerificationInput,
+  ): Promise<CheckFindMyIdVerificationOutput> {
+    try {
+      const { ok, msg } = await this.twilioService.checkVerification(
+        checkFindMyIdkVerificationInput,
+      );
+
+      if (!ok) {
+        return { ok, msg };
+      }
+
+      const user = await this.users.findOne({
+        where: { mobile: checkFindMyIdkVerificationInput.phoneNumber },
+      });
+
+      const token = this.jwtService.sign(user.id);
+
+      return { ok: true, msg: 'good work', token };
+    } catch (error) {
+      return { ok: false, error, msg: '서버가 잠시 아픈거 같아요...' };
     }
   }
 }
