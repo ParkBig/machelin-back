@@ -20,7 +20,7 @@ import {
   TogglePostLikeDislikeOutput,
 } from './dtos/toggle-post-like-dislike.dto';
 import { FilesInterceptor } from '@nestjs/platform-express';
-import { UsersPostsOutput } from './dtos/users-posts.dto';
+import { UsersPostsInput, UsersPostsOutput } from './dtos/users-posts.dto';
 import { UsersPostLikesDislikesOutput } from './dtos/users-post-likes-dislikes.dto';
 
 @Controller('posts')
@@ -29,8 +29,10 @@ export class PostsController {
 
   // get~
   @Get('usersPosts')
-  usersPosts(@Query('userId') userId: number): Promise<UsersPostsOutput> {
-    return this.postsService.usersPosts(userId);
+  usersPosts(
+    @Query() usersPostsInput: UsersPostsInput,
+  ): Promise<UsersPostsOutput> {
+    return this.postsService.usersPosts(usersPostsInput);
   }
 
   @Get('usersPostLikesDislikes')

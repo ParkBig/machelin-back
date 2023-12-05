@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Post } from './entities/post.entity';
-import { Repository } from 'typeorm';
+import { FindManyOptions, Repository } from 'typeorm';
 import { MakePostInput, MakePostOutput } from './dtos/make-post.dto';
 import { User } from 'src/users/entities/user.entity';
 import { ReportPostInput, ReportPostOutput } from './dtos/report-post.dto';
@@ -13,7 +13,7 @@ import {
 } from './dtos/toggle-post-like-dislike.dto';
 import { Report } from './entities/report.entity';
 import { S3ServiceService } from 'src/s3-service/s3-service.service';
-import { UsersPostsOutput } from './dtos/users-posts.dto';
+import { UsersPostsInput, UsersPostsOutput } from './dtos/users-posts.dto';
 import { UsersPostLikesDislikesOutput } from './dtos/users-post-likes-dislikes.dto';
 
 @Injectable()
@@ -71,13 +71,24 @@ export class PostsService {
     }
   }
 
-  async usersPosts(userId: number): Promise<UsersPostsOutput> {
+  async usersPosts({
+    targetId,
+    myId,
+  }: UsersPostsInput): Promise<UsersPostsOutput> {
     try {
-      const posts = await this.posts.find({
-        where: { owner: { id: userId } },
+      const isGetMyPost = targetId === myId;
+
+      const postQuery: FindManyOptions<Post> = {
+        where: { owner: { id: targetId } },
         relations: ['owner'],
         order: { createdAt: 'DESC' },
-      });
+      };
+
+      if (!isGetMyPost) {
+        postQuery['where']['isPublic'] = true;
+      }
+
+      const posts = await this.posts.find(postQuery);
 
       return { ok: true, posts, msg: 'good work' };
     } catch (error) {

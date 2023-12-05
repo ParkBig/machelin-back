@@ -1,19 +1,25 @@
 import { Injectable } from '@nestjs/common';
-import {
-  NearbyRestaurantsInput,
-  NearbyRestaurantsOutput,
-} from './dtos/nearby-restaurants.dto';
 import { ConfigService } from '@nestjs/config';
 import axios from 'axios';
 import { RestaurantDetailOutput } from './dtos/restaurant-detail.dto';
 import { PostsService } from 'src/posts/posts.service';
 import { RestaurantPostsOutput } from './dtos/restaurant-posts.dto';
+import {
+  NearbyRestaurantsSearchInput,
+  NearbyRestaurantsSearchOutput,
+} from './dtos/nearby-restaurants-search.dto';
+import {
+  RestaurantsTextSearchInput,
+  RestaurantsTextSearchOutput,
+} from './dtos/restaurants-text-search.dto';
+import { RestaurantDetail } from './dtos/google-restaurant.interface';
 
 @Injectable()
 export class RestaurantsService {
   private readonly googleKey: string;
   private readonly nearbySearchBaseUrl: string;
   private readonly detailSearchBaseUrl: string;
+  private readonly textSearchBaseUrl: string;
 
   constructor(
     private readonly configService: ConfigService,
@@ -26,15 +32,16 @@ export class RestaurantsService {
     this.detailSearchBaseUrl = this.configService.get(
       'GOOGLE_DETAIL_SEARCH_URL',
     );
+    this.textSearchBaseUrl = this.configService.get('GOOGLE_TEXT_SEARCH_URL');
   }
 
-  async nearbyRestaurants({
+  async nearbyRestaurantsSearch({
     lat,
     lng,
     radius,
     keyword,
     nextPageParams,
-  }: NearbyRestaurantsInput): Promise<NearbyRestaurantsOutput> {
+  }: NearbyRestaurantsSearchInput): Promise<NearbyRestaurantsSearchOutput> {
     try {
       const params = {
         location: `${lat},${lng}`,
@@ -61,6 +68,20 @@ export class RestaurantsService {
         restaurants: restaurants,
         next_page_token: hasNextPageToken,
       };
+    } catch (error) {
+      return { ok: false, error, msg: '서버가 잠시 아픈거 같아요...' };
+    }
+  }
+
+  async restaurantsTextSearch({
+    keyword,
+  }: RestaurantsTextSearchInput): Promise<RestaurantsTextSearchOutput> {
+    try {
+      const requestUrl = `${this.textSearchBaseUrl}query=${keyword}&key=${this.googleKey}&language=ko`;
+      const response = await axios.get(requestUrl);
+      const result = response.data.results;
+
+      return { ok: true, msg: 'good work', result };
     } catch (error) {
       return { ok: false, error, msg: '서버가 잠시 아픈거 같아요...' };
     }

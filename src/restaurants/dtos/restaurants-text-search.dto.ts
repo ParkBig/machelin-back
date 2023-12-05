@@ -2,11 +2,11 @@ import { CommonOutput } from 'src/common/dtos/output.dto';
 import { IsString } from 'class-validator';
 import { RestaurantDetail } from './google-restaurant.interface';
 
-export class RestaurantDetailInput {
+export class RestaurantsTextSearchInput {
   @IsString()
-  restaurantId: string;
+  keyword: string;
 }
 
-export class RestaurantDetailOutput extends CommonOutput {
-  restaurantDetail?: RestaurantDetail;
+export class RestaurantsTextSearchOutput extends CommonOutput {
+  result?: RestaurantDetail[];
 }

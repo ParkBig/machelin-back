@@ -2,7 +2,7 @@ import { IsOptional, IsString } from 'class-validator';
 import { CommonOutput } from 'src/common/dtos/output.dto';
 import { responseRestaurant } from './google-restaurant.interface';
 
-export class NearbyRestaurantsInput {
+export class NearbyRestaurantsSearchInput {
   @IsString()
   lat: string;
 
@@ -19,7 +19,7 @@ export class NearbyRestaurantsInput {
   nextPageParams: string;
 }
 
-export class NearbyRestaurantsOutput extends CommonOutput {
+export class NearbyRestaurantsSearchOutput extends CommonOutput {
   restaurants?: responseRestaurant[];
   next_page_token?: string;
 }

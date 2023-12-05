@@ -43,6 +43,7 @@ import { Bookmark } from './bookmarks/entities/bookmark.entity';
         GOOGLE_KEY: Joi.string().required(),
         GOOGLE_NEARBY_SEARCH_URL: Joi.string().required(),
         GOOGLE_DETAIL_SEARCH_URL: Joi.string().required(),
+        GOOGLE_TEXT_SEARCH_URL: Joi.string().required(),
         NCLOUD_CLIENT_ID: Joi.string().required(),
         NCLOUD_CLIENT_SECRET: Joi.string().required(),
       }),
