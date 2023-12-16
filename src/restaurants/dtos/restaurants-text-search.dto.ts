@@ -1,12 +1,16 @@
 import { CommonOutput } from 'src/common/dtos/output.dto';
-import { IsString } from 'class-validator';
-import { RestaurantDetail } from './google-restaurant.interface';
+import { IsOptional, IsString } from 'class-validator';
+import { GooglePlace } from 'src/google-api/dtos/google-place-dto';
 
 export class RestaurantsTextSearchInput {
   @IsString()
   keyword: string;
+
+  @IsOptional()
+  nextPageParams: string;
 }
 
 export class RestaurantsTextSearchOutput extends CommonOutput {
-  result?: RestaurantDetail[];
+  restaurants?: GooglePlace[];
+  next_page_token?: string;
 }

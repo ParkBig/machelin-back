@@ -18,11 +18,11 @@ export class Bookmark {
   @Column()
   restaurantId: string;
 
-  @Column()
-  lat: string;
+  @Column({ type: 'decimal' })
+  lat: number;
 
-  @Column()
-  lng: string;
+  @Column({ type: 'decimal' })
+  lng: number;
 
   @Column()
   restaurantName: string;
@@ -33,11 +33,11 @@ export class Bookmark {
   @Column()
   address: string;
 
-  @Column()
-  rating: string;
+  @Column({ type: 'decimal' })
+  rating: number;
 
-  @Column()
-  totalRatings: string;
+  @Column({ type: 'decimal' })
+  totalRatings: number;
 
   @ManyToOne((type) => User, (user) => user.bookmarks, {
     onDelete: 'CASCADE',

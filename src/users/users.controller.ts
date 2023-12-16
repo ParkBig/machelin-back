@@ -55,6 +55,10 @@ import {
   CheckFindMyIdVerificationOutput,
   CheckFindMyIdkVerificationInput,
 } from './dtos/check-find-my-id-verification.dto';
+import {
+  UsersSubLocalityInput,
+  UsersSubLocalityOutput,
+} from './dtos/users-sub-locality.dto';
 
 @Controller('users')
 export class UsersController {
@@ -87,6 +91,13 @@ export class UsersController {
     @Query('userId') userId: number,
   ): Promise<UsersFollowersOutput> {
     return this.usersService.usersFollowers(userId);
+  }
+
+  @Get('usersSubLocality')
+  usersSubLocality(
+    @Query() usersSubLocalityInput: UsersSubLocalityInput,
+  ): Promise<UsersSubLocalityOutput> {
+    return this.usersService.usersSubLocality(usersSubLocalityInput);
   }
 
   // Post~

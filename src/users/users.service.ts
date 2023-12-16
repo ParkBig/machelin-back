@@ -51,6 +51,15 @@ import {
   CheckFindMyIdVerificationOutput,
   CheckFindMyIdkVerificationInput,
 } from './dtos/check-find-my-id-verification.dto';
+import { GoogleApiService } from 'src/google-api/google-api.service';
+import {
+  UsersSubLocalityInput,
+  UsersSubLocalityOutput,
+} from './dtos/users-sub-locality.dto';
+import {
+  UsersFollowsIdInput,
+  UsersFollowsIdOutput,
+} from './dtos/users-follows-id.dto';
 
 @Injectable()
 export class UsersService {
@@ -58,6 +67,7 @@ export class UsersService {
     private readonly s3ServiceService: S3ServiceService,
     private readonly twilioService: TwilioService,
     private readonly jwtService: JwtService,
+    private readonly googleApiService: GoogleApiService,
     @InjectRepository(User) private readonly users: Repository<User>,
   ) {}
 
@@ -68,18 +78,12 @@ export class UsersService {
     mobile,
   }: SignUpInput): Promise<SignUpOutput> {
     try {
-      // 이메일 중복가능, 폰 중복체크해주기
       const existingUser = await this.users.findOne({
-        where: [{ email }, { nickname }],
+        where: { email },
       });
 
       if (existingUser) {
-        if (existingUser.email === email) {
-          return { ok: false, msg: '이미 존재하는 이메일입니다.' };
-        }
-        if (existingUser.nickname === nickname) {
-          return { ok: false, msg: '이미 존재하는 닉네임입니다.' };
-        }
+        return { ok: false, msg: '이미 존재하는 이메일입니다.' };
       }
 
       await this.users.save(
@@ -465,6 +469,43 @@ export class UsersService {
       const token = this.jwtService.sign(user.id);
 
       return { ok: true, msg: 'good work', token };
+    } catch (error) {
+      return { ok: false, error, msg: '서버가 잠시 아픈거 같아요...' };
+    }
+  }
+
+  async usersSubLocality({
+    lat,
+    lng,
+  }: UsersSubLocalityInput): Promise<UsersSubLocalityOutput> {
+    try {
+      const { subLocality } = await this.googleApiService.reverseGeocoding({
+        lat,
+        lng,
+      });
+
+      return { ok: true, msg: 'good work', subLocality };
+    } catch (error) {
+      return { ok: false, error, msg: '서버가 잠시 아픈거 같아요...' };
+    }
+  }
+
+  async usersFollowsPosts({
+    userId,
+  }: UsersFollowsIdInput): Promise<UsersFollowsIdOutput> {
+    try {
+      if (!userId) {
+        return { followsIdArr: [] };
+      }
+
+      const user = await this.users.findOne({
+        where: { id: userId },
+        relations: ['follows'],
+      });
+
+      const followsIdArr = user.follows.map((user) => user.id);
+
+      return { followsIdArr };
     } catch (error) {
       return { ok: false, error, msg: '서버가 잠시 아픈거 같아요...' };
     }

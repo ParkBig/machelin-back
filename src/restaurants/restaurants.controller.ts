@@ -1,7 +1,13 @@
 import { Controller, Get, Query } from '@nestjs/common';
 import { RestaurantsService } from './restaurants.service';
-import { RestaurantDetailOutput } from './dtos/restaurant-detail.dto';
-import { RestaurantPostsOutput } from './dtos/restaurant-posts.dto';
+import {
+  RestaurantDetailInput,
+  RestaurantDetailOutput,
+} from './dtos/restaurant-detail.dto';
+import {
+  RestaurantPostsInput,
+  RestaurantPostsOutput,
+} from './dtos/restaurant-posts.dto';
 import {
   NearbyRestaurantsSearchInput,
   NearbyRestaurantsSearchOutput,
@@ -35,15 +41,15 @@ export class restaurantsController {
 
   @Get('restaurantDetail')
   restaurantDetail(
-    @Query('restaurantId') restaurantId: string,
+    @Query() restaurantDetailInput: RestaurantDetailInput,
   ): Promise<RestaurantDetailOutput> {
-    return this.restaurantsService.restaurantDetail(restaurantId);
+    return this.restaurantsService.restaurantDetail(restaurantDetailInput);
   }
 
   @Get('restaurantPosts')
   restaurantPosts(
-    @Query('restaurantId') restaurantId: string,
+    @Query() restaurantPostsInput: RestaurantPostsInput,
   ): Promise<RestaurantPostsOutput> {
-    return this.restaurantsService.restaurantPosts(restaurantId);
+    return this.restaurantsService.restaurantPosts(restaurantPostsInput);
   }
 }

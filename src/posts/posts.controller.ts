@@ -4,7 +4,6 @@ import {
   Get,
   Post,
   Query,
-  Res,
   UploadedFiles,
   UseInterceptors,
 } from '@nestjs/common';
@@ -13,7 +12,6 @@ import { MakePostInput, MakePostOutput } from './dtos/make-post.dto';
 import { User } from 'src/users/entities/user.entity';
 import { AuthUser } from 'src/auth/auth-user.decorator';
 import { Role } from 'src/auth/role.decorator';
-import { Response } from 'express';
 import { ReportPostInput, ReportPostOutput } from './dtos/report-post.dto';
 import {
   TogglePostLikeDislikeInput,
@@ -22,17 +20,44 @@ import {
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { UsersPostsInput, UsersPostsOutput } from './dtos/users-posts.dto';
 import { UsersPostLikesDislikesOutput } from './dtos/users-post-likes-dislikes.dto';
+import {
+  UsersPostForMyMapInput,
+  UsersPostForMyMapOutput,
+} from './dtos/users-post-for-my-map.dto';
+import {
+  NeighborhoodPostsInput,
+  NeighborhoodPostsOutput,
+} from './dtos/neighborhood-posts.dto';
 
 @Controller('posts')
 export class PostsController {
   constructor(private readonly postsService: PostsService) {}
 
   // get~
+  @Get('neighborhoodPosts')
+  @Role(['Any'])
+  neighborhoodPosts(
+    @AuthUser() authUser: User,
+    @Query() neighborhoodPostsInput: NeighborhoodPostsInput,
+  ): Promise<NeighborhoodPostsOutput> {
+    return this.postsService.neighborhoodPosts(
+      authUser,
+      neighborhoodPostsInput,
+    );
+  }
+
   @Get('usersPosts')
   usersPosts(
     @Query() usersPostsInput: UsersPostsInput,
   ): Promise<UsersPostsOutput> {
     return this.postsService.usersPosts(usersPostsInput);
+  }
+
+  @Get('usersPostForMyMap')
+  usersPostForMyMap(
+    @Query() usersPostForMyMapInput: UsersPostForMyMapInput,
+  ): Promise<UsersPostForMyMapOutput> {
+    return this.postsService.usersPostForMyMap(usersPostForMyMapInput);
   }
 
   @Get('usersPostLikesDislikes')
@@ -51,7 +76,6 @@ export class PostsController {
     @UploadedFiles() images: Array<Express.Multer.File>,
     @Body() makePostInput: MakePostInput,
   ): Promise<MakePostOutput> {
-    console.log(makePostInput);
     return this.postsService.makePost(authUser, images, makePostInput);
   }
 
@@ -75,8 +99,4 @@ export class PostsController {
   ): Promise<ReportPostOutput> {
     return this.postsService.reportPost(authUser, reportPostInput);
   }
-
-  // 포스트 조회하기
-  // 포스트 작성하기
-  // 포스트 수정하기
 }

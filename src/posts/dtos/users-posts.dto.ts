@@ -7,8 +7,12 @@ export class UsersPostsInput {
 
   @IsOptional()
   myId: number;
+
+  page: number;
 }
 
 export class UsersPostsOutput extends CommonOutput {
   posts?: Post[];
+
+  nextPage?: number | null;
 }

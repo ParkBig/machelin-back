@@ -1,12 +1,10 @@
 import { CommonOutput } from 'src/common/dtos/output.dto';
-import { IsString } from 'class-validator';
-import { RestaurantDetail } from './google-restaurant.interface';
+import { GooglePlace } from 'src/google-api/dtos/google-place-dto';
 
 export class RestaurantDetailInput {
-  @IsString()
   restaurantId: string;
 }
 
 export class RestaurantDetailOutput extends CommonOutput {
-  restaurantDetail?: RestaurantDetail;
+  restaurantDetail?: GooglePlace;
 }

@@ -18,6 +18,7 @@ import { Dislike } from './posts/entities/dislike.entity';
 import { Report } from './posts/entities/report.entity';
 import { S3ServiceModule } from './s3-service/s3-service.module';
 import { Bookmark } from './bookmarks/entities/bookmark.entity';
+import { GoogleApiModule } from './google-api/google-api.module';
 
 @Module({
   imports: [
@@ -44,6 +45,7 @@ import { Bookmark } from './bookmarks/entities/bookmark.entity';
         GOOGLE_NEARBY_SEARCH_URL: Joi.string().required(),
         GOOGLE_DETAIL_SEARCH_URL: Joi.string().required(),
         GOOGLE_TEXT_SEARCH_URL: Joi.string().required(),
+        GOOGLE_REVERSE_GEOCODING_URL: Joi.string().required(),
         NCLOUD_CLIENT_ID: Joi.string().required(),
         NCLOUD_CLIENT_SECRET: Joi.string().required(),
       }),
@@ -71,6 +73,7 @@ import { Bookmark } from './bookmarks/entities/bookmark.entity';
     CommentsModule,
     TwilioModule,
     S3ServiceModule,
+    GoogleApiModule,
   ],
   controllers: [],
   providers: [],

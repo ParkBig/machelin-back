@@ -1,6 +1,6 @@
 import { IsOptional, IsString } from 'class-validator';
 import { CommonOutput } from 'src/common/dtos/output.dto';
-import { responseRestaurant } from './google-restaurant.interface';
+import { GooglePlace } from 'src/google-api/dtos/google-place-dto';
 
 export class NearbyRestaurantsSearchInput {
   @IsString()
@@ -20,6 +20,6 @@ export class NearbyRestaurantsSearchInput {
 }
 
 export class NearbyRestaurantsSearchOutput extends CommonOutput {
-  restaurants?: responseRestaurant[];
+  restaurants?: GooglePlace[];
   next_page_token?: string;
 }

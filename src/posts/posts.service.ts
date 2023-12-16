@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Post } from './entities/post.entity';
-import { FindManyOptions, Repository } from 'typeorm';
+import { FindManyOptions, In, Repository } from 'typeorm';
 import { MakePostInput, MakePostOutput } from './dtos/make-post.dto';
 import { User } from 'src/users/entities/user.entity';
 import { ReportPostInput, ReportPostOutput } from './dtos/report-post.dto';
@@ -15,16 +15,70 @@ import { Report } from './entities/report.entity';
 import { S3ServiceService } from 'src/s3-service/s3-service.service';
 import { UsersPostsInput, UsersPostsOutput } from './dtos/users-posts.dto';
 import { UsersPostLikesDislikesOutput } from './dtos/users-post-likes-dislikes.dto';
+import {
+  UsersPostForMyMapInput,
+  UsersPostForMyMapOutput,
+} from './dtos/users-post-for-my-map.dto';
+import { GoogleApiService } from 'src/google-api/google-api.service';
+import {
+  NeighborhoodPostsInput,
+  NeighborhoodPostsOutput,
+} from './dtos/neighborhood-posts.dto';
+import { UsersService } from 'src/users/users.service';
 
 @Injectable()
 export class PostsService {
   constructor(
+    private readonly usersService: UsersService,
     private readonly s3ServiceService: S3ServiceService,
+    private readonly googleApiService: GoogleApiService,
     @InjectRepository(Post) private readonly posts: Repository<Post>,
     @InjectRepository(Like) private readonly likes: Repository<Like>,
     @InjectRepository(Dislike) private readonly dislikes: Repository<Dislike>,
     @InjectRepository(Report) private readonly reports: Repository<Report>,
   ) {}
+
+  async neighborhoodPosts(
+    authUser: User,
+    { subLocality, page }: NeighborhoodPostsInput,
+  ): Promise<NeighborhoodPostsOutput> {
+    try {
+      const { followsIdArr } = await this.usersService.usersFollowsPosts({
+        userId: authUser.id,
+      });
+
+      const postQuery: FindManyOptions<Post> = {
+        where: [
+          {
+            isPublic: true,
+            ownerSubLocality: subLocality,
+          },
+          {
+            isPublic: true,
+            restaurantSubLocality: subLocality,
+          },
+          {
+            isPublic: true,
+            owner: { id: In(followsIdArr) },
+          },
+        ],
+        relations: ['owner'],
+        order: { createdAt: 'DESC' },
+        skip: (page - 1) * 10,
+        take: 10,
+      };
+
+      const [neighborhoodPosts, total] = await this.posts.findAndCount(
+        postQuery,
+      );
+
+      const nextPage = total > page * 10 ? Number(page) + 1 : null;
+
+      return { ok: true, neighborhoodPosts, nextPage };
+    } catch (error) {
+      return { ok: false, error, msg: '서버가 잠시 아픈거 같아요...' };
+    }
+  }
 
   async makePost(
     authUser: User,
@@ -43,27 +97,57 @@ export class PostsService {
         hashtags,
         rating,
         isPublic,
+        hasRestaurantTag,
+        restaurantLat,
+        restaurantLng,
         restaurantId,
         restaurantName,
         restaurantAddress,
+        userLat,
+        userLng,
       } = makePostInput;
-      const restaurant = { restaurantId, restaurantName, restaurantAddress };
 
       const hashtagArr = hashtags
         .match(/#[^\s,#]+/g)
         ?.map((tag) => tag.replace('#', '').trim());
 
-      await this.posts.save(
-        this.posts.create({
-          images: imageUrls,
-          contents,
-          hashtags: hashtagArr,
-          rating: +rating,
-          isPublic: isPublic === 'true' ? true : false,
-          owner: authUser,
-          ...restaurant,
-        }),
-      );
+      const { subLocality: ownerSubLocality } =
+        await this.googleApiService.reverseGeocoding({
+          lat: userLat,
+          lng: userLng,
+        });
+
+      const postColumn = {
+        images: imageUrls,
+        contents,
+        hashtags: hashtagArr,
+        rating: +rating,
+        isPublic: isPublic === 'true' ? true : false,
+        owner: authUser,
+        ownerSubLocality,
+      };
+
+      if (hasRestaurantTag) {
+        const { subLocality: restaurantSubLocality } =
+          await this.googleApiService.reverseGeocoding({
+            lat: restaurantLat,
+            lng: restaurantLng,
+          });
+
+        const postRestaurantInfoColumn = {
+          restaurantId,
+          restaurantName,
+          restaurantAddress,
+          hasRestaurantTag: hasRestaurantTag === 'true' ? true : false,
+          restaurantLat: Number(restaurantLat),
+          restaurantLng: Number(restaurantLng),
+          restaurantSubLocality,
+        };
+
+        Object.assign(postColumn, postRestaurantInfoColumn);
+      }
+
+      await this.posts.save(this.posts.create(postColumn));
 
       return { ok: true, msg: 'good work!' };
     } catch (error) {
@@ -74,6 +158,7 @@ export class PostsService {
   async usersPosts({
     targetId,
     myId,
+    page,
   }: UsersPostsInput): Promise<UsersPostsOutput> {
     try {
       const isGetMyPost = targetId === myId;
@@ -82,15 +167,34 @@ export class PostsService {
         where: { owner: { id: targetId } },
         relations: ['owner'],
         order: { createdAt: 'DESC' },
+        skip: (page - 1) * 10,
+        take: 10,
       };
 
       if (!isGetMyPost) {
         postQuery['where']['isPublic'] = true;
       }
 
-      const posts = await this.posts.find(postQuery);
+      const [posts, total] = await this.posts.findAndCount(postQuery);
 
-      return { ok: true, posts, msg: 'good work' };
+      const nextPage = total > page * 10 ? Number(page) + 1 : null;
+
+      return { ok: true, posts, msg: 'good work', nextPage };
+    } catch (error) {
+      return { ok: false, error, msg: '서버가 잠시 아픈거 같아요...' };
+    }
+  }
+
+  async usersPostForMyMap({
+    userId,
+  }: UsersPostForMyMapInput): Promise<UsersPostForMyMapOutput> {
+    try {
+      const posts = await this.posts.find({
+        where: { owner: { id: userId }, hasRestaurantTag: true },
+        order: { rating: 'ASC' },
+      });
+
+      return { ok: true, posts, msg: 'good' };
     } catch (error) {
       return { ok: false, error, msg: '서버가 잠시 아픈거 같아요...' };
     }
@@ -201,15 +305,21 @@ export class PostsService {
     return usersPosts;
   }
 
-  async findRestaurantPosts(restaurantId: string) {
+  async findRestaurantPosts(restaurantId: string, page: number) {
     try {
-      const restaurantPosts = await this.posts.find({
-        where: { restaurantId },
+      const query: FindManyOptions<Post> = {
+        where: { restaurantId, isPublic: true },
         relations: ['owner'],
         order: { createdAt: 'DESC' },
-      });
+        skip: (page - 1) * 10,
+        take: 10,
+      };
 
-      return { ok: true, restaurantPosts, msg: 'good work' };
+      const [restaurantPosts, total] = await this.posts.findAndCount(query);
+
+      const nextPage = total > page * 10 ? Number(page) + 1 : null;
+
+      return { ok: true, restaurantPosts, nextPage, msg: 'good work' };
     } catch (error) {
       return { ok: false, error, msg: '서버가 잠시 아픈거 같아요...' };
     }

@@ -20,6 +20,21 @@ export class Post {
   @CreateDateColumn()
   createdAt: Date;
 
+  @Column()
+  ownerSubLocality: string;
+
+  @Column({ nullable: true })
+  restaurantSubLocality: string;
+
+  @Column({ nullable: true })
+  hasRestaurantTag: boolean;
+
+  @Column({ nullable: true, type: 'decimal' })
+  restaurantLat: number;
+
+  @Column({ nullable: true, type: 'decimal' })
+  restaurantLng: number;
+
   @Column({ nullable: true })
   restaurantId: string;
 
@@ -29,9 +44,6 @@ export class Post {
   @Column({ nullable: true })
   restaurantAddress: string;
 
-  @Column('text', { array: true, default: [] })
-  hashtags: string[];
-
   @Column({ nullable: true })
   rating: number;
 
@@ -40,6 +52,9 @@ export class Post {
 
   @Column()
   contents: string;
+
+  @Column('text', { array: true, default: [] })
+  hashtags: string[];
 
   @Column()
   isPublic: boolean;

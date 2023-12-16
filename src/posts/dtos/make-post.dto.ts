@@ -9,6 +9,15 @@ import { CommonOutput } from 'src/common/dtos/output.dto';
 
 export class MakePostInput {
   @IsOptional()
+  hasRestaurantTag?: string;
+
+  @IsOptional()
+  restaurantLat: string;
+
+  @IsOptional()
+  restaurantLng: string;
+
+  @IsOptional()
   @IsString()
   restaurantId?: string;
 
@@ -21,17 +30,23 @@ export class MakePostInput {
   restaurantAddress?: string;
 
   @IsOptional()
-  hashtags?: string;
-
-  @IsOptional()
   @IsString()
   rating?: string;
 
   @IsString()
   contents: string;
 
+  @IsOptional()
+  hashtags?: string;
+
   @IsString()
   isPublic: string;
+
+  @IsString()
+  userLat: string;
+
+  @IsString()
+  userLng: string;
 }
 
 export class MakePostOutput extends CommonOutput {}

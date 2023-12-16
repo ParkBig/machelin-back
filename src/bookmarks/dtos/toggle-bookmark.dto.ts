@@ -5,11 +5,11 @@ export class ToggleBookmarkInput {
   @IsString()
   restaurantId: string;
 
-  @IsString()
-  lat: string;
+  @IsNumber()
+  lat: number;
 
-  @IsString()
-  lng: string;
+  @IsNumber()
+  lng: number;
 
   @IsString()
   restaurantName: string;
@@ -20,11 +20,11 @@ export class ToggleBookmarkInput {
   @IsString()
   address: string;
 
-  @IsString()
-  rating: string;
+  @IsNumber()
+  rating: number;
 
-  @IsString()
-  totalRatings: string;
+  @IsNumber()
+  totalRatings: number;
 }
 
 export class ToggleBookmarkOutput extends CommonOutput {}
