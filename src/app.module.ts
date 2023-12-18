@@ -24,10 +24,11 @@ import { GoogleApiModule } from './google-api/google-api.module';
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: process.env.NODE_ENV === 'dev' ? '.env.dev' : '.env.prod',
-      ignoreEnvFile: process.env.NODE_ENV === 'prod',
+      envFilePath:
+        process.env.NODE_ENV === 'dev' ? '.env.dev' : '.env.production',
+      ignoreEnvFile: process.env.NODE_ENV === 'production',
       validationSchema: Joi.object({
-        NODE_ENV: Joi.string().valid('dev', 'test', 'prod').required(),
+        NODE_ENV: Joi.string().valid('dev', 'test', 'production').required(),
         POSTGRES_HOST: Joi.string().required(),
         POSTGRES_PORT: Joi.string().required(),
         POSTGRES_USERNAME: Joi.string().required(),
@@ -55,9 +56,10 @@ import { GoogleApiModule } from './google-api/google-api.module';
       username: process.env.POSTGRES_USERNAME,
       password: process.env.POSTGRES_PASSWORD,
       database: process.env.POSTGRES_NAME,
-      synchronize: process.env.NODE_ENV !== 'prod',
+      synchronize: process.env.NODE_ENV !== 'production',
       logging:
-        process.env.NODE_ENV !== 'prod' && process.env.NODE_ENV !== 'test',
+        process.env.NODE_ENV !== 'production' &&
+        process.env.NODE_ENV !== 'test',
       entities: [User, Post, Bookmark, Comment, Like, Report, Dislike],
     }),
     JwtModule.forRoot({
