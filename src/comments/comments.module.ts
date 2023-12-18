@@ -7,7 +7,7 @@ import { Post } from 'src/posts/entities/post.entity';
 import { User } from 'src/users/entities/user.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Comment, Post, User])],
+  imports: [TypeOrmModule.forFeature([Comment, Post])],
   controllers: [CommentsController],
   providers: [CommentsService],
 })

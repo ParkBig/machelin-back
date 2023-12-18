@@ -8,12 +8,13 @@ import {
   UploadedFile,
   UseInterceptors,
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { UsersService } from './users.service';
-import { SignUpInput, SignUpOutput } from './dtos/sign-up.dto';
-import { LoginInput, LoginOutput } from './dtos/login.dto';
 import { Role } from 'src/auth/role.decorator';
 import { AuthUser } from 'src/auth/auth-user.decorator';
 import { User } from './entities/user.entity';
+import { SignUpInput, SignUpOutput } from './dtos/sign-up.dto';
+import { LoginInput, LoginOutput } from './dtos/login.dto';
 import { WithdrawalOutput } from './dtos/withdrawal.dto';
 import { NicknameOutput } from './dtos/nickname.dto';
 import {
@@ -22,7 +23,6 @@ import {
 } from './dtos/toggle-friend-state.dto';
 import { MeOutput } from './dtos/me.dto';
 import { ExploreUserOutput } from './dtos/explore-user.dto';
-import { FileInterceptor } from '@nestjs/platform-express';
 import {
   ModifyUserNicknameInput,
   ModifyUserNicknameOutput,

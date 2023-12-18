@@ -46,8 +46,6 @@ import { GoogleApiModule } from './google-api/google-api.module';
         GOOGLE_DETAIL_SEARCH_URL: Joi.string().required(),
         GOOGLE_TEXT_SEARCH_URL: Joi.string().required(),
         GOOGLE_REVERSE_GEOCODING_URL: Joi.string().required(),
-        NCLOUD_CLIENT_ID: Joi.string().required(),
-        NCLOUD_CLIENT_SECRET: Joi.string().required(),
       }),
     }),
     TypeOrmModule.forRoot({
@@ -60,7 +58,7 @@ import { GoogleApiModule } from './google-api/google-api.module';
       synchronize: process.env.NODE_ENV !== 'prod',
       logging:
         process.env.NODE_ENV !== 'prod' && process.env.NODE_ENV !== 'test',
-      entities: [User, Post, Bookmark, Comment, Like, Report, Dislike], // DB의 스키마의 테이블에 엔티티생성
+      entities: [User, Post, Bookmark, Comment, Like, Report, Dislike],
     }),
     JwtModule.forRoot({
       privateKey: process.env.POSTGRES_PRIVATE_KEY,

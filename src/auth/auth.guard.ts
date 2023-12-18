@@ -4,10 +4,6 @@ import { JwtService } from 'src/jwt/jwt.service';
 import { UsersService } from 'src/users/users.service';
 import { AllowedRoles } from './role.decorator';
 
-/**
- * 인증관련 2번째 변경물
- * jwt는 인증부분에서만 필요하니 모든요청(제외할수있지만)에 적용되는 미들웨어 말고 guard를이용 원하는 부분만 useGuard로 검증할수 있지만, 데코레이터를 만들기로 함.
- */
 @Injectable()
 export class AuthGuard implements CanActivate {
   constructor(

@@ -13,7 +13,6 @@ import {
 @Injectable()
 export class CommentsService {
   constructor(
-    @InjectRepository(User) private readonly users: Repository<User>,
     @InjectRepository(Post) private readonly posts: Repository<Post>,
     @InjectRepository(Comment) private readonly comments: Repository<Comment>,
   ) {}
@@ -42,10 +41,6 @@ export class CommentsService {
   ): Promise<MakeCommentOutput> {
     try {
       if (!authUser) return { ok: false, msg: '잘못된 요청이에요!' };
-      const user = await this.users.findOne({ where: { id: authUser.id } });
-      if (!user) {
-        return { ok: false, msg: '잘못된 요청이에요!' };
-      }
 
       const { postId, comment } = makeCommentInput;
 
@@ -55,7 +50,7 @@ export class CommentsService {
       }
 
       await this.comments.save(
-        this.comments.create({ postId: post, comment, owner: user }),
+        this.comments.create({ postId: post, comment, owner: authUser }),
       );
 
       return { ok: true, msg: 'good work' };
