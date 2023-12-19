@@ -65,6 +65,11 @@ export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   // Get~
+  @Get()
+  hello() {
+    return 'hello';
+  }
+
   @Get('me')
   @Role(['Any'])
   me(@AuthUser() authUser: User): Promise<MeOutput> {
