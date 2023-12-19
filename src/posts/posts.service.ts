@@ -43,10 +43,6 @@ export class PostsService {
     { subLocality, page }: NeighborhoodPostsInput,
   ): Promise<NeighborhoodPostsOutput> {
     try {
-      const { followsIdArr } = await this.usersService.usersFollowsPosts({
-        userId: authUser.id,
-      });
-
       const postQuery: FindManyOptions<Post> = {
         where: [
           {
@@ -57,16 +53,26 @@ export class PostsService {
             isPublic: true,
             restaurantSubLocality: subLocality,
           },
-          {
-            isPublic: true,
-            owner: { id: In(followsIdArr) },
-          },
         ],
         relations: ['owner'],
         order: { createdAt: 'DESC' },
         skip: (page - 1) * 10,
         take: 10,
       };
+
+      if (authUser) {
+        const { followsIdArr } = await this.usersService.usersFollowsPosts({
+          userId: authUser.id,
+        });
+
+        postQuery['where'] = [
+          ...postQuery['wheer'],
+          {
+            isPublic: true,
+            owner: { id: In(followsIdArr) },
+          },
+        ];
+      }
 
       const [neighborhoodPosts, total] = await this.posts.findAndCount(
         postQuery,
