@@ -27,6 +27,7 @@ export class TwilioService {
   async sendVerification({
     phoneNumber,
   }: SendVerificationInput): Promise<SendVerificationOutput> {
+    console.log(phoneNumber);
     try {
       const korPhoneNumber = phone(phoneNumber, { country: 'KOR' });
       if (!korPhoneNumber.isValid) {
