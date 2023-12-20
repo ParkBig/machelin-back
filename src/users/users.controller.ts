@@ -67,7 +67,7 @@ export class UsersController {
   // Get~
   @Get()
   hello() {
-    return 'good work';
+    return process.env.PORT;
   }
 
   @Get('me')
