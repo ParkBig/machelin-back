@@ -510,4 +510,13 @@ export class UsersService {
       return { ok: false, error, msg: '서버가 잠시 아픈거 같아요...' };
     }
   }
+
+  async test() {
+    try {
+      const users = await this.users.find();
+      return { ok: false, users, msg: 'good work' };
+    } catch (error) {
+      return { ok: false, error, msg: '서버가 잠시 아픈거 같아요...' };
+    }
+  }
 }
