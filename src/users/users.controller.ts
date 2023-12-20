@@ -67,7 +67,7 @@ export class UsersController {
   // Get~
   @Get()
   hello() {
-    return this.usersService.test();
+    return 'hi';
   }
 
   @Get('me')
