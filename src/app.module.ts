@@ -19,6 +19,8 @@ import { Report } from './posts/entities/report.entity';
 import { S3ServiceModule } from './s3-service/s3-service.module';
 import { Bookmark } from './bookmarks/entities/bookmark.entity';
 import { GoogleApiModule } from './google-api/google-api.module';
+import { StampsModule } from './stamps/stamps.module';
+import { Stamp } from './stamps/entities/stamp.entity';
 
 @Module({
   imports: [
@@ -29,6 +31,7 @@ import { GoogleApiModule } from './google-api/google-api.module';
       ignoreEnvFile: process.env.NODE_ENV === 'production',
       validationSchema: Joi.object({
         NODE_ENV: Joi.string().valid('dev', 'test', 'production').required(),
+        DATABASE_URL: Joi.string(),
         POSTGRES_HOST: Joi.string(),
         POSTGRES_PORT: Joi.string(),
         POSTGRES_USERNAME: Joi.string(),
@@ -64,7 +67,7 @@ import { GoogleApiModule } from './google-api/google-api.module';
       logging:
         process.env.NODE_ENV !== 'production' &&
         process.env.NODE_ENV !== 'test',
-      entities: [User, Post, Bookmark, Comment, Like, Report, Dislike],
+      entities: [User, Post, Bookmark, Comment, Like, Report, Dislike, Stamp],
     }),
     JwtModule.forRoot({
       privateKey: process.env.POSTGRES_PRIVATE_KEY,
@@ -78,6 +81,7 @@ import { GoogleApiModule } from './google-api/google-api.module';
     TwilioModule,
     S3ServiceModule,
     GoogleApiModule,
+    StampsModule,
   ],
   controllers: [],
   providers: [],

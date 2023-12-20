@@ -65,13 +65,12 @@ export class PostsService {
           userId: authUser.id,
         });
 
-        postQuery['where'] = [
-          ...postQuery['wheer'],
-          {
+        if (Array.isArray(postQuery['where'])) {
+          postQuery['where'].push({
             isPublic: true,
             owner: { id: In(followsIdArr) },
-          },
-        ];
+          });
+        }
       }
 
       const [neighborhoodPosts, total] = await this.posts.findAndCount(

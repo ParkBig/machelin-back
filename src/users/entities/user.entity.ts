@@ -19,6 +19,7 @@ import { Dislike } from 'src/posts/entities/dislike.entity';
 import { Like } from 'src/posts/entities/like.entity';
 import { Report } from 'src/posts/entities/report.entity';
 import { Bookmark } from 'src/bookmarks/entities/bookmark.entity';
+import { Stamp } from 'src/stamps/entities/stamp.entity';
 
 export enum UserRole {
   admin = 'ADMIN',
@@ -87,6 +88,9 @@ export class User {
 
   @OneToMany((type) => Bookmark, (bookmark) => bookmark.owner)
   bookmarks: Bookmark[];
+
+  @OneToMany((type) => Stamp, (stamp) => stamp.owner)
+  stamps: Stamp[];
 
   @OneToMany((type) => Comment, (comment) => comment.owner)
   comments: Comment[];
