@@ -33,7 +33,11 @@ import {
 export class PostsController {
   constructor(private readonly postsService: PostsService) {}
 
-  // get~
+  @Get()
+  hello() {
+    return 'good work';
+  }
+
   @Get('neighborhoodPosts')
   @Role(['Any'])
   neighborhoodPosts(

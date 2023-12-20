@@ -13,6 +13,11 @@ import {
 export class CommentsController {
   constructor(private readonly commentsService: CommentsService) {}
 
+  @Get()
+  hello() {
+    return 'good work';
+  }
+
   @Get('postsComments')
   @Role(['Any'])
   postsComments(

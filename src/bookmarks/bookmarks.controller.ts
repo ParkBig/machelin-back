@@ -13,7 +13,11 @@ import { UsersBookmarksOutput } from './dtos/users-bookmarks.dto';
 export class BookmarkController {
   constructor(private readonly bookmarksService: BookmarkService) {}
 
-  // get~
+  @Get()
+  hello() {
+    return 'good work';
+  }
+
   @Get('usersBookmarks')
   usersBookmarks(
     @Query('userId') userId: number,
@@ -21,7 +25,6 @@ export class BookmarkController {
     return this.bookmarksService.usersBookmarks(userId);
   }
 
-  // post~
   @Post('toggleBookmark')
   @Role(['Any'])
   toggleBookmark(

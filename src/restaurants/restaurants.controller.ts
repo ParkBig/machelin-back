@@ -21,6 +21,11 @@ import {
 export class restaurantsController {
   constructor(private readonly restaurantsService: RestaurantsService) {}
 
+  @Get()
+  hello() {
+    return 'good work';
+  }
+
   @Get('nearbyRestaurantsSearch')
   nearbyRestaurantsSearch(
     @Query() nearbyRestaurantsInput: NearbyRestaurantsSearchInput,

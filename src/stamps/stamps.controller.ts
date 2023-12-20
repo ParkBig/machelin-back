@@ -11,6 +11,11 @@ import { UsersStampOutput } from './dtos/users-stamp.dto';
 export class StampsController {
   constructor(private readonly stampsService: StampsService) {}
 
+  @Get()
+  hello() {
+    return 'good work';
+  }
+
   @Get('usersStamp')
   @Role(['Any'])
   usersStamp(@AuthUser() authUser: User): Promise<UsersStampOutput> {

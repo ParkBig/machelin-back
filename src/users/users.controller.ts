@@ -67,7 +67,7 @@ export class UsersController {
   // Get~
   @Get()
   hello() {
-    return 'hello';
+    return 'good work';
   }
 
   @Get('me')
