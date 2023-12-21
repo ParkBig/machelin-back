@@ -69,9 +69,9 @@ import { Stamp } from './stamps/entities/stamp.entity';
       //       database: process.env.POSTGRES_NAME,
       //     }),
       synchronize: process.env.NODE_ENV !== 'production',
-      logging:
-        process.env.NODE_ENV !== 'production' &&
-        process.env.NODE_ENV !== 'test',
+      logging: true,
+      // process.env.NODE_ENV !== 'production' &&
+      // process.env.NODE_ENV !== 'test',
       entities: [User, Post, Bookmark, Comment, Like, Report, Dislike, Stamp],
     }),
     JwtModule.forRoot({
