@@ -54,20 +54,15 @@ import { Stamp } from './stamps/entities/stamp.entity';
     }),
     TypeOrmModule.forRoot({
       type: 'postgres',
-      host: process.env.POSTGRES_HOST,
-      port: +process.env.POSTGRES_PORT,
-      username: process.env.POSTGRES_USERNAME,
-      password: process.env.POSTGRES_PASSWORD,
-      database: process.env.POSTGRES_NAME,
-      // ...(process.env.DATABASE_URL
-      //   ? { url: process.env.DATABASE_URL }
-      //   : {
-      //       host: process.env.POSTGRES_HOST,
-      //       port: +process.env.POSTGRES_PORT,
-      //       username: process.env.POSTGRES_USERNAME,
-      //       password: process.env.POSTGRES_PASSWORD,
-      //       database: process.env.POSTGRES_NAME,
-      //     }),
+      ...(process.env.DATABASE_URL
+        ? { url: process.env.DATABASE_URL }
+        : {
+            host: process.env.POSTGRES_HOST,
+            port: +process.env.POSTGRES_PORT,
+            username: process.env.POSTGRES_USERNAME,
+            password: process.env.POSTGRES_PASSWORD,
+            database: process.env.POSTGRES_NAME,
+          }),
       synchronize: process.env.NODE_ENV !== 'production',
       logging: true,
       // process.env.NODE_ENV !== 'production' &&
