@@ -15,26 +15,26 @@ export class Stamp {
   @CreateDateColumn()
   createdAt: Date;
 
+  @Column()
+  title: string;
+
+  @Column()
+  content: string;
+
   @Column({ type: 'decimal' })
   lat: number;
 
   @Column({ type: 'decimal' })
   lng: number;
 
-  @Column()
+  @Column({ nullable: true })
   restaurantId: string;
 
-  @Column()
+  @Column({ nullable: true })
   restaurantName: string;
 
-  @Column()
+  @Column({ nullable: true })
   address: string;
-
-  @Column({ type: 'decimal' })
-  rating: number;
-
-  @Column({ type: 'decimal' })
-  totalRatings: number;
 
   @ManyToOne((type) => User, (user) => user.stamps, {
     onDelete: 'CASCADE',

@@ -1,9 +1,12 @@
-import { IsNumber, IsString } from 'class-validator';
+import { IsNumber, IsOptional, IsString } from 'class-validator';
 import { CommonOutput } from 'src/common/dtos/output.dto';
 
 export class MakeStampInput {
   @IsString()
-  restaurantId: string;
+  title: string;
+
+  @IsString()
+  content: string;
 
   @IsNumber()
   lat: number;
@@ -12,16 +15,16 @@ export class MakeStampInput {
   lng: number;
 
   @IsString()
+  @IsOptional()
+  restaurantId: string;
+
+  @IsString()
+  @IsOptional()
   restaurantName: string;
 
   @IsString()
+  @IsOptional()
   address: string;
-
-  @IsNumber()
-  rating: number;
-
-  @IsNumber()
-  totalRatings: number;
 }
 
 export class MakeStampOutput extends CommonOutput {}
