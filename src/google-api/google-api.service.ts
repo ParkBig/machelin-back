@@ -136,7 +136,7 @@ export class GoogleApiService {
       const requestUrl = `${this.reverseGeocodingUrl}${queryString}`;
       const response = await axios.get(requestUrl);
       const results = response.data.results;
-      const subLocality = results[results.length - 3].formatted_address;
+      const subLocality = results[results.length - 4].formatted_address;
 
       return { subLocality };
     } catch (error) {
