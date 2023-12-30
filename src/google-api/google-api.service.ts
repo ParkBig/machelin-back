@@ -51,7 +51,7 @@ export class GoogleApiService {
         keyword: keyword,
         key: this.googleKey,
         language: 'ko',
-        type: 'restaurant',
+        type: keyword ? '' : 'restaurant',
       };
       const toNextPageParams = nextPageParams
         ? `&pagetoken=${nextPageParams}`
@@ -74,6 +74,7 @@ export class GoogleApiService {
 
   async textSearch({
     keyword,
+    isRegional,
     nextPageParams,
   }: TextSearchInput): Promise<TextSearchOutput> {
     try {
@@ -82,7 +83,7 @@ export class GoogleApiService {
         query: keyword,
         key: this.googleKey,
         language: 'ko',
-        type: 'restaurant',
+        type: isRegional ? 'restaurant' : '',
       };
       const toNextPageParams = nextPageParams
         ? `&pagetoken=${nextPageParams}`

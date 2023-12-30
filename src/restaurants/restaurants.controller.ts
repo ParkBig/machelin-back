@@ -37,7 +37,7 @@ export class restaurantsController {
 
   @Get('restaurantsTextSearch')
   restaurantsTextSearch(
-    @Query() restaurantsTextSearchInput: RestaurantsTextSearchInput,
+    @Query() restaurantsTextSearchInput: any,
   ): Promise<RestaurantsTextSearchOutput> {
     return this.restaurantsService.restaurantsTextSearch(
       restaurantsTextSearchInput,
