@@ -344,7 +344,10 @@ export class PostsService {
         return { ok: false, msg: '잘못된 요청이에요!' };
       }
 
-      const post = await this.posts.findOne({ where: { id } });
+      const post = await this.posts.findOne({
+        where: { id },
+        relations: ['owner'],
+      });
       if (!post) {
         return { ok: false, msg: '잘못된 요청이에요!' };
       }
