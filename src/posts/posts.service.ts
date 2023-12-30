@@ -25,6 +25,11 @@ import {
   NeighborhoodPostsOutput,
 } from './dtos/neighborhood-posts.dto';
 import { UsersService } from 'src/users/users.service';
+import { DeletePostInput, DeletePostOutput } from './dtos/delete-posts.dto';
+import {
+  ModifyPostPublicStateInput,
+  ModifyPostPublicStateOutput,
+} from './dtos/modify-post-public-state.dto';
 
 @Injectable()
 export class PostsService {
@@ -325,6 +330,60 @@ export class PostsService {
       const nextPage = total > page * 10 ? Number(page) + 1 : null;
 
       return { ok: true, restaurantPosts, nextPage, msg: 'good work' };
+    } catch (error) {
+      return { ok: false, error, msg: '서버가 잠시 아픈거 같아요...' };
+    }
+  }
+
+  async modifyPostPublicState(
+    authUser: User,
+    { id, isPublic }: ModifyPostPublicStateInput,
+  ): Promise<ModifyPostPublicStateOutput> {
+    try {
+      if (!authUser) {
+        return { ok: false, msg: '잘못된 요청이에요!' };
+      }
+
+      const post = await this.posts.findOne({ where: { id } });
+      if (!post) {
+        return { ok: false, msg: '잘못된 요청이에요!' };
+      }
+
+      if (post.owner.id !== authUser.id) {
+        return { ok: false, msg: '잘못된 요청이에요!' };
+      }
+
+      post.isPublic = isPublic;
+
+      await this.posts.save(post);
+
+      return { ok: true, msg: 'good work' };
+    } catch (error) {
+      return { ok: false, error, msg: '서버가 잠시 아픈거 같아요...' };
+    }
+  }
+
+  async deletePost(
+    authUser: User,
+    { id }: DeletePostInput,
+  ): Promise<DeletePostOutput> {
+    try {
+      if (!authUser) {
+        return { ok: false, msg: '잘못된 요청이에요!' };
+      }
+
+      const post = await this.posts.findOne({ where: { id } });
+      if (!post) {
+        return { ok: false, msg: '잘못된 요청이에요!' };
+      }
+
+      if (post.owner.id !== authUser.id) {
+        return { ok: false, msg: '잘못된 요청이에요!' };
+      }
+
+      await this.posts.remove(post);
+
+      return { ok: true, msg: 'good work' };
     } catch (error) {
       return { ok: false, error, msg: '서버가 잠시 아픈거 같아요...' };
     }

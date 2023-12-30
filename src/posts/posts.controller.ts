@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Post,
   Query,
@@ -28,6 +29,11 @@ import {
   NeighborhoodPostsInput,
   NeighborhoodPostsOutput,
 } from './dtos/neighborhood-posts.dto';
+import { DeletePostInput, DeletePostOutput } from './dtos/delete-posts.dto';
+import {
+  ModifyPostPublicStateInput,
+  ModifyPostPublicStateOutput,
+} from './dtos/modify-post-public-state.dto';
 
 @Controller('posts')
 export class PostsController {
@@ -101,5 +107,26 @@ export class PostsController {
     @Body() reportPostInput: ReportPostInput,
   ): Promise<ReportPostOutput> {
     return this.postsService.reportPost(authUser, reportPostInput);
+  }
+
+  @Post('modifyPostPublicState')
+  @Role(['Any'])
+  modifyPostPublicState(
+    @AuthUser() authUser: User,
+    @Body() modifyPostPublicStateInput: ModifyPostPublicStateInput,
+  ): Promise<ModifyPostPublicStateOutput> {
+    return this.postsService.modifyPostPublicState(
+      authUser,
+      modifyPostPublicStateInput,
+    );
+  }
+
+  @Delete('deletePost')
+  @Role(['Any'])
+  deletePost(
+    @AuthUser() authUser: User,
+    @Query() deletePostInput: DeletePostInput,
+  ): Promise<DeletePostOutput> {
+    return this.postsService.deletePost(authUser, deletePostInput);
   }
 }
