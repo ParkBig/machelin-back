@@ -71,7 +71,6 @@ export class PostsController {
     return this.postsService.usersPostLikesDislikes(userId);
   }
 
-  // Post~
   @Post('makePost')
   @Role(['Any'])
   @UseInterceptors(FilesInterceptor('images'))

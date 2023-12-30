@@ -6,10 +6,12 @@ import { MakeStampInput, MakeStampOutput } from './dtos/make-stamp.dto';
 import { User } from 'src/users/entities/user.entity';
 import { DeleteStampInput, DeleteStampOutput } from './dtos/delete-stamp.dto';
 import { UsersStampOutput } from './dtos/users-stamp.dto';
+import { S3ServiceService } from 'src/s3-service/s3-service.service';
 
 @Injectable()
 export class StampsService {
   constructor(
+    private readonly s3ServiceService: S3ServiceService,
     @InjectRepository(Stamp) private readonly stamps: Repository<Stamp>,
   ) {}
 
@@ -31,6 +33,7 @@ export class StampsService {
 
   async makeStamp(
     authUser: User,
+    images: Array<Express.Multer.File>,
     makeStampInput: MakeStampInput,
   ): Promise<MakeStampOutput> {
     try {
@@ -38,8 +41,14 @@ export class StampsService {
         return { ok: false, msg: '잘못된 요청이에요!' };
       }
 
+      const imageUrls = await this.s3ServiceService.uploadImages(images);
+
       await this.stamps.save(
-        this.stamps.create({ ...makeStampInput, owner: authUser }),
+        this.stamps.create({
+          ...makeStampInput,
+          images: imageUrls,
+          owner: authUser,
+        }),
       );
 
       return { ok: true, msg: 'good work' };

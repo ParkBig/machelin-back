@@ -1,4 +1,12 @@
-import { Body, Controller, Delete, Get, Post, Query } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Post,
+  Query,
+  UploadedFiles,
+} from '@nestjs/common';
 import { StampsService } from './stamps.service';
 import { Role } from 'src/auth/role.decorator';
 import { AuthUser } from 'src/auth/auth-user.decorator';
@@ -26,9 +34,10 @@ export class StampsController {
   @Role(['Any'])
   makeStamp(
     @AuthUser() authUser: User,
+    @UploadedFiles() images: Array<Express.Multer.File>,
     @Body() makeStampInput: MakeStampInput,
   ): Promise<MakeStampOutput> {
-    return this.stampsService.makeStamp(authUser, makeStampInput);
+    return this.stampsService.makeStamp(authUser, images, makeStampInput);
   }
 
   @Delete('deleteStamp')

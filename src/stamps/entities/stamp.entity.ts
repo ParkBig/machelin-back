@@ -27,6 +27,9 @@ export class Stamp {
   @Column({ type: 'decimal' })
   lng: number;
 
+  @Column('text', { array: true, default: [] })
+  images: string[];
+
   @Column({ nullable: true })
   restaurantId: string;
 
