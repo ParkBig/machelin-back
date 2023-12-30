@@ -7,7 +7,7 @@ export class RestaurantsTextSearchInput {
   keyword: string;
 
   @IsBoolean()
-  isRegional: boolean;
+  isRestaurant: boolean;
 
   @IsOptional()
   nextPageParams: string;

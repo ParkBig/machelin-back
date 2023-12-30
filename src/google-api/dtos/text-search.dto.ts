@@ -5,7 +5,7 @@ import { GooglePlace } from './google-place-dto';
 export class TextSearchInput {
   keyword: string;
 
-  isRegional: boolean;
+  isRestaurant: boolean;
 
   @IsOptional()
   nextPageParams: string;
