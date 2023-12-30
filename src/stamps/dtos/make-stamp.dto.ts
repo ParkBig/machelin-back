@@ -9,20 +9,17 @@ export class MakeStampInput {
   content: string;
 
   @IsNumber()
-  lat: number;
+  lat: string;
 
   @IsNumber()
-  lng: number;
+  lng: string;
 
-  @IsString()
   @IsOptional()
   restaurantId: string;
 
-  @IsString()
   @IsOptional()
   restaurantName: string;
 
-  @IsString()
   @IsOptional()
   address: string;
 }

@@ -43,13 +43,26 @@ export class StampsService {
 
       const imageUrls = await this.s3ServiceService.uploadImages(images);
 
-      await this.stamps.save(
-        this.stamps.create({
-          ...makeStampInput,
-          images: imageUrls,
-          owner: authUser,
-        }),
-      );
+      const stampColumn = {
+        images: imageUrls,
+        title: makeStampInput.title,
+        content: makeStampInput.content,
+        lat: Number(makeStampInput.lat),
+        lng: Number(makeStampInput.lng),
+        owner: authUser,
+      };
+
+      if (makeStampInput.restaurantId) {
+        const stampRestaurantInfoColumn = {
+          restaurantId: makeStampInput.restaurantId,
+          restaurantName: makeStampInput.restaurantName,
+          address: makeStampInput.address,
+        };
+
+        Object.assign(stampColumn, stampRestaurantInfoColumn);
+      }
+
+      await this.stamps.save(this.stamps.create(stampColumn));
 
       return { ok: true, msg: 'good work' };
     } catch (error) {

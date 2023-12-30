@@ -6,6 +6,7 @@ import {
   Post,
   Query,
   UploadedFiles,
+  UseInterceptors,
 } from '@nestjs/common';
 import { StampsService } from './stamps.service';
 import { Role } from 'src/auth/role.decorator';
@@ -14,6 +15,7 @@ import { User } from 'src/users/entities/user.entity';
 import { MakeStampInput, MakeStampOutput } from './dtos/make-stamp.dto';
 import { DeleteStampInput, DeleteStampOutput } from './dtos/delete-stamp.dto';
 import { UsersStampOutput } from './dtos/users-stamp.dto';
+import { FilesInterceptor } from '@nestjs/platform-express';
 
 @Controller('stamps')
 export class StampsController {
@@ -32,10 +34,11 @@ export class StampsController {
 
   @Post('makeStamp')
   @Role(['Any'])
+  @UseInterceptors(FilesInterceptor('images'))
   makeStamp(
     @AuthUser() authUser: User,
     @UploadedFiles() images: Array<Express.Multer.File>,
-    @Body() makeStampInput: MakeStampInput,
+    @Body() makeStampInput: any,
   ): Promise<MakeStampOutput> {
     return this.stampsService.makeStamp(authUser, images, makeStampInput);
   }
