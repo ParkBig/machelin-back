@@ -21,7 +21,7 @@ export class JwtMiddleware implements NestMiddleware {
           }
         }
       } catch (error) {
-        console.log(error);
+        // console.log(error);
       }
     }
     next();
