@@ -23,6 +23,7 @@ export class StampsService {
 
       const stamps = await this.stamps.find({
         where: { owner: { id: authUser.id } },
+        order: { createdAt: 'DESC' },
       });
 
       return { ok: true, stamps, msg: 'good work' };

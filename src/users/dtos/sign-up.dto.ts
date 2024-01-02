@@ -2,8 +2,8 @@ import { IsEmail, IsString } from 'class-validator';
 import { CommonOutput } from 'src/common/dtos/output.dto';
 
 export class SignUpInput {
-  @IsEmail()
-  email: string;
+  @IsString()
+  loginId: string;
 
   @IsString()
   password: string;

@@ -48,6 +48,9 @@ export class User {
   mobile: string;
 
   @Column()
+  loginId: string;
+
+  @Column({ nullable: true })
   @IsEmail()
   email: string;
 

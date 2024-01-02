@@ -72,22 +72,22 @@ export class UsersService {
   ) {}
 
   async signUp({
-    email,
+    loginId,
     password,
     nickname,
     mobile,
   }: SignUpInput): Promise<SignUpOutput> {
     try {
       const existingUser = await this.users.findOne({
-        where: { email },
+        where: { loginId },
       });
 
       if (existingUser) {
-        return { ok: false, msg: '이미 존재하는 이메일입니다.' };
+        return { ok: false, msg: '이미 존재하는 아이디입니다.' };
       }
 
       await this.users.save(
-        this.users.create({ email, password, nickname, mobile }),
+        this.users.create({ loginId, password, nickname, mobile }),
       );
 
       return { ok: true, msg: 'good work' };
@@ -96,10 +96,10 @@ export class UsersService {
     }
   }
 
-  async login({ email, password }: LoginInput): Promise<LoginOutput> {
+  async login({ loginId, password }: LoginInput): Promise<LoginOutput> {
     try {
       const user = await this.users.findOne({
-        where: { email },
+        where: { loginId },
       });
       if (!user) return { ok: false, msg: '존재하지 않는 유저입니다.' };
 
