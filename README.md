@@ -1,73 +1,88 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# 마슐랭(Machelin)
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
-  
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://coveralls.io/github/nestjs/nest?branch=master" target="_blank"><img src="https://coveralls.io/repos/github/nestjs/nest/badge.svg?branch=master#9" alt="Coverage" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+가장 많은 고민거리 뭐 먹지? <br>
 
-## Description
+마슐랭을 통해 내 주변 식당을 찾고, 이용하고, 미쉐린 가이드처럼 리뷰를 남겨보자! <br>
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+전체 지역 식당들 또한 확인 할 수 있고, 지역별 게시글들을 확인 할 수 있어요.
 
-## Installation
+맛집을 찾는 여행, 혹은 여행 속 맛집 탐방. 마슐랭에서 가능합니다<br>
+해외에서도 국내와 같은 서비스를 이용할 수 있음으로, 지역별 게시글을 통해 여행자들과 함께 여행을 떠날 수 있어요.
 
-```bash
-$ npm install
-```
+직접 다녀온 곳만 찍을 수 있는 스탬프 기능으로 나만의 지도를 완성해 추억을 남길 수 있어요.
 
-## Running the app
+## **`Summary`**
 
-```bash
-# development
-$ npm run start
+4개의 메인 스크린
 
-# watch mode
-$ npm run start:dev
+1. 내주변 식당보기 스크린
 
-# production mode
-$ npm run start:prod
-```
+   - 지도화면 베이스로 내 주변(거리설정가능) 식당 확인 및 검색 가능
+   - 위의 내용을 통해 식당 상세정보 및 리뷰 확인 가능, 리뷰작성 가능
 
-## Test
+2. 지역검색 식당보기 스크린
 
-```bash
-# unit tests
-$ npm run test
+   - "서울 강남 or 서울 전체" 와 같이 지역을 선택해서 지역에 해당하는 식당을 확인 할 수 있으며 검색 가능
+   - 식당 상세정보 및 리뷰 확인 가능, 리뷰작성 가능
 
-# e2e tests
-$ npm run test:e2e
+3. 동네 게시글 보기 스크린
 
-# test coverage
-$ npm run test:cov
-```
+   - 내 위치 기반을 통해 해당하는 지역의 게시글 및 친구들의 게시글을 확인 할 수 있음
+   - 해외에서도 위치 기반 서비스 이용 가능함으로 새로운 친구들과의 동행을 통해 혼자 가기 어렵거나 여행지에서의 특별한 추억을 남길 수 있음
 
-## Support
+4. 내정보(내 게시글, 북마크, 팔로우, 팔로워, 나의지도) 스크린
+   - 나의 게시글, 북마크, 스탬프, 소셜및 나의 선호음식, 식당등과 같은 나의 정보 확인 가능
+   - 내가 직접 이동한 곳만 찍을수 있는 스탬프 기능을 통해 나의 여행을 글과 사진으로 기념, 인증 할 수 있음
+   - 나의지도 화면으로 이동하여 나의 스탬프, 북마크, 게시글에 해당하는 장소를 확인 할 수 있음
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+## **`이미지`**
 
-## Stay in touch
+- 내주변 식당보기 스크린
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+  - 내주변 식당보기 스크린-1
 
-## License
+    ![내주변 식당보기 스크린-1](https://machelin-images.s3.ap-northeast-2.amazonaws.com/1-1.png)
 
-  Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+  - 내주변 식당보기 스크린-2
+
+    ![내주변 식당보기 스크린-2](https://machelin-images.s3.ap-northeast-2.amazonaws.com/1-2.png)
+
+  - 내주변 식당보기 스크린-3
+
+    ![내주변 식당보기 스크린-3](https://machelin-images.s3.ap-northeast-2.amazonaws.com/1-3.png)
+
+- 지역검색 식당보기 스크린
+
+  - 지역검색 식당보기 스크린
+
+    ![지역검색 식당보기 스크린](https://machelin-images.s3.ap-northeast-2.amazonaws.com/2-1.png)
+
+- 동네 게시글 보기 스크린
+
+  - 동네 게시글 보기 스크린-1
+
+    ![동네 게시글 보기 스크린-1](https://machelin-images.s3.ap-northeast-2.amazonaws.com/3-1.png)
+
+  - 동네 게시글 보기 스크린-2
+
+    ![동네 게시글 보기 스크린-2](https://machelin-images.s3.ap-northeast-2.amazonaws.com/3-2.png)
+
+- 내정보(내 게시글, 북마크, 팔로우, 팔로워, 나의지도) 스크린
+
+  - 내정보 스크린-1
+
+    ![내정보 스크린-1](https://machelin-images.s3.ap-northeast-2.amazonaws.com/4-1.png)
+
+  - 내정보 스크린-2
+
+    ![내정보 스크린-2](https://machelin-images.s3.ap-northeast-2.amazonaws.com/4-2.png)
+
+- 게시글 작성하기 스크린
+
+  - 게시글 작성하기 스크린-1
+
+    ![게시글 작성하기 스크린-1](https://machelin-images.s3.ap-northeast-2.amazonaws.com/5-1.png)
+
+  - 게시글 작성하기 스크린-2
+
+    ![게시글 작성하기 스크린-2](https://machelin-images.s3.ap-northeast-2.amazonaws.com/5-2.png)
