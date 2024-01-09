@@ -20,6 +20,9 @@ export class Post {
   @CreateDateColumn()
   createdAt: Date;
 
+  @Column({ default: 'post' })
+  postType: 'post' | 'ad' | 'notice';
+
   @Column()
   ownerSubLocality: string;
 

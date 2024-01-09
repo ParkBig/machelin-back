@@ -58,6 +58,14 @@ export class PostsService {
             isPublic: true,
             restaurantSubLocality: subLocality,
           },
+          {
+            isPublic: true,
+            postType: 'notice',
+          },
+          {
+            isPublic: true,
+            postType: 'ad',
+          },
         ],
         relations: ['owner'],
         order: { createdAt: 'DESC' },
