@@ -23,6 +23,9 @@ export class Post {
   @Column({ default: 'post' })
   postType: 'post' | 'ad' | 'notice';
 
+  @Column({ default: 0 })
+  views: number;
+
   @Column()
   ownerSubLocality: string;
 

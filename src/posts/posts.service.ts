@@ -69,8 +69,8 @@ export class PostsService {
         ],
         relations: ['owner'],
         order: { createdAt: 'DESC' },
-        skip: (page - 1) * 10,
-        take: 10,
+        skip: (page - 1) * 5,
+        take: 5,
       };
 
       if (authUser) {
