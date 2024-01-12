@@ -101,7 +101,7 @@ export class PostsService {
 
       const nextPage = total > page * 5 ? Number(page) + 1 : null;
 
-      return { ok: true, neighborhoodPosts, nextPage };
+      return { ok: true, neighborhoodPosts, nextPage, msg: 'good work' };
     } catch (error) {
       return { ok: false, error, msg: '서버가 잠시 아픈거 같아요...' };
     }
@@ -221,7 +221,7 @@ export class PostsService {
         order: { rating: 'ASC' },
       });
 
-      return { ok: true, posts, msg: 'good' };
+      return { ok: true, posts, msg: 'good work' };
     } catch (error) {
       return { ok: false, error, msg: '서버가 잠시 아픈거 같아요...' };
     }
@@ -455,7 +455,7 @@ export class PostsService {
 
       const nextPage = total > page * 5 ? Number(page) + 1 : null;
 
-      return { ok: true, searchPosts, nextPage };
+      return { ok: true, searchPosts, nextPage, msg: 'good work' };
     } catch (error) {
       return { ok: false, error, msg: '서버가 잠시 아픈거 같아요...' };
     }
@@ -486,7 +486,7 @@ export class PostsService {
 
       const nextPage = total > page * 5 ? Number(page) + 1 : null;
 
-      return { ok: true, noticePosts, nextPage };
+      return { ok: true, noticePosts, nextPage, msg: 'good work' };
     } catch (error) {
       return { ok: false, error, msg: '서버가 잠시 아픈거 같아요...' };
     }
@@ -518,7 +518,7 @@ export class PostsService {
 
       const nextPage = total > page * 5 ? Number(page) + 1 : null;
 
-      return { ok: true, adPosts, nextPage };
+      return { ok: true, adPosts, nextPage, msg: 'good work' };
     } catch (error) {
       return { ok: false, error, msg: '서버가 잠시 아픈거 같아요...' };
     }
