@@ -63,14 +63,13 @@ export class PostsService {
           {
             isPublic: true,
             hasProblem: false,
-            postType: 'notice',
+            postType: 'allNotice',
           },
-          /** 변경해야됌 */
-          // {
-          //   isPublic: true,
-          //   hasProblem: false,
-          //   postType: 'ad',
-          // },
+          {
+            isPublic: true,
+            hasProblem: false,
+            postType: 'localNotice',
+          },
         ],
         relations: ['owner'],
         order: { createdAt: 'DESC' },
@@ -96,7 +95,7 @@ export class PostsService {
         postQuery,
       );
 
-      const nextPage = total > page * 10 ? Number(page) + 1 : null;
+      const nextPage = total > page * 5 ? Number(page) + 1 : null;
 
       return { ok: true, neighborhoodPosts, nextPage };
     } catch (error) {

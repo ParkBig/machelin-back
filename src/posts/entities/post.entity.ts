@@ -21,7 +21,7 @@ export class Post {
   createdAt: Date;
 
   @Column({ default: 'post' })
-  postType: 'post' | 'localAd' | 'allAd' | 'notice';
+  postType: 'post' | 'localAd' | 'allAd' | 'allNotice' | 'localNotice';
 
   @Column({ default: false })
   hasProblem: boolean;
