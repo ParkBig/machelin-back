@@ -23,6 +23,9 @@ export class Post {
   @Column({ default: 'post' })
   postType: 'post' | 'localAd' | 'allAd' | 'allNotice' | 'localNotice';
 
+  @Column({ default: 99999 })
+  expirationDate: number;
+
   @Column({ default: false })
   hasProblem: boolean;
 

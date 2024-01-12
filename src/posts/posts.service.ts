@@ -73,6 +73,7 @@ export class PostsService {
             hasProblem: false,
             postType: 'localNotice',
           },
+          // will add for ad
         ],
         relations: ['owner'],
         order: { createdAt: 'DESC' },
@@ -485,6 +486,7 @@ export class PostsService {
     }
   }
 
+  /** will update! */
   async adPosts({ page }: AdPostsInput): Promise<AdPostsOutput> {
     try {
       const postQuery: FindManyOptions<Post> = {
