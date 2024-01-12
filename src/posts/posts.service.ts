@@ -438,6 +438,12 @@ export class PostsService {
               nickname: ILike(`%${keyword}%`),
             },
           },
+          {
+            isPublic: true,
+            hasProblem: false,
+            postType: 'post',
+            ownerSubLocality: ILike(`%${keyword}%`),
+          },
         ],
         relations: ['owner'],
         order: { createdAt: 'DESC' },
