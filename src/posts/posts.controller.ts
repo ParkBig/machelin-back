@@ -34,6 +34,9 @@ import {
   ModifyPostPublicStateInput,
   ModifyPostPublicStateOutput,
 } from './dtos/modify-post-public-state.dto';
+import { SearchPostsInput, SearchPostsOutput } from './dtos/search-posts.dto';
+import { NoticePostsInput, NoticePostsOutput } from './dtos/notice-posts.dto';
+import { AdPostsInput, AdPostsOutput } from './dtos/ad-posts.dto';
 
 @Controller('posts')
 export class PostsController {
@@ -75,6 +78,25 @@ export class PostsController {
     @Query('userId') userId: number,
   ): Promise<UsersPostLikesDislikesOutput> {
     return this.postsService.usersPostLikesDislikes(userId);
+  }
+
+  @Get('searchPosts')
+  searchPosts(
+    @Query() searchPostsInput: SearchPostsInput,
+  ): Promise<SearchPostsOutput> {
+    return this.postsService.searchPosts(searchPostsInput);
+  }
+
+  @Get('noticePosts')
+  noticePosts(
+    @Query() noticePostsInput: NoticePostsInput,
+  ): Promise<NoticePostsOutput> {
+    return this.postsService.noticePosts(noticePostsInput);
+  }
+
+  @Get('adPosts')
+  adPosts(@Query() adPostsInput: AdPostsInput): Promise<AdPostsOutput> {
+    return this.postsService.adPosts(adPostsInput);
   }
 
   @Post('makePost')

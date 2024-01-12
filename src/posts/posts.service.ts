@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Post } from './entities/post.entity';
-import { FindManyOptions, In, Repository } from 'typeorm';
+import { FindManyOptions, ILike, In, Repository } from 'typeorm';
 import { MakePostInput, MakePostOutput } from './dtos/make-post.dto';
 import { User } from 'src/users/entities/user.entity';
 import { ReportPostInput, ReportPostOutput } from './dtos/report-post.dto';
@@ -30,6 +30,9 @@ import {
   ModifyPostPublicStateInput,
   ModifyPostPublicStateOutput,
 } from './dtos/modify-post-public-state.dto';
+import { SearchPostsInput, SearchPostsOutput } from './dtos/search-posts.dto';
+import { NoticePostsInput, NoticePostsOutput } from './dtos/notice-posts.dto';
+import { AdPostsInput, AdPostsOutput } from './dtos/ad-posts.dto';
 
 @Injectable()
 export class PostsService {
@@ -408,6 +411,106 @@ export class PostsService {
       await this.posts.remove(post);
 
       return { ok: true, msg: 'good work' };
+    } catch (error) {
+      return { ok: false, error, msg: '서버가 잠시 아픈거 같아요...' };
+    }
+  }
+
+  async searchPosts({
+    keyword,
+    page,
+  }: SearchPostsInput): Promise<SearchPostsOutput> {
+    try {
+      const postQuery: FindManyOptions<Post> = {
+        where: [
+          {
+            isPublic: true,
+            hasProblem: false,
+            postType: 'post',
+            contents: ILike(`%${keyword}%`),
+          },
+          {
+            isPublic: true,
+            hasProblem: false,
+            postType: 'post',
+            owner: {
+              nickname: ILike(`%${keyword}%`),
+            },
+          },
+        ],
+        relations: ['owner'],
+        order: { createdAt: 'DESC' },
+        skip: (page - 1) * 5,
+        take: 5,
+      };
+
+      const [searchPosts, total] = await this.posts.findAndCount(postQuery);
+
+      const nextPage = total > page * 5 ? Number(page) + 1 : null;
+
+      return { ok: true, searchPosts, nextPage };
+    } catch (error) {
+      return { ok: false, error, msg: '서버가 잠시 아픈거 같아요...' };
+    }
+  }
+
+  async noticePosts({ page }: NoticePostsInput): Promise<NoticePostsOutput> {
+    try {
+      const postQuery: FindManyOptions<Post> = {
+        where: [
+          {
+            isPublic: true,
+            hasProblem: false,
+            postType: 'allNotice',
+          },
+          {
+            isPublic: true,
+            hasProblem: false,
+            postType: 'localNotice',
+          },
+        ],
+        relations: ['owner'],
+        order: { createdAt: 'DESC' },
+        skip: (page - 1) * 5,
+        take: 5,
+      };
+
+      const [noticePosts, total] = await this.posts.findAndCount(postQuery);
+
+      const nextPage = total > page * 5 ? Number(page) + 1 : null;
+
+      return { ok: true, noticePosts, nextPage };
+    } catch (error) {
+      return { ok: false, error, msg: '서버가 잠시 아픈거 같아요...' };
+    }
+  }
+
+  async adPosts({ page }: AdPostsInput): Promise<AdPostsOutput> {
+    try {
+      const postQuery: FindManyOptions<Post> = {
+        where: [
+          {
+            isPublic: true,
+            hasProblem: false,
+            postType: 'allAd',
+          },
+          {
+            isPublic: true,
+            hasProblem: false,
+            postType: 'localAd',
+          },
+        ],
+        relations: ['owner'],
+        order: { createdAt: 'DESC' },
+        skip: (page - 1) * 5,
+        take: 5,
+      };
+
+      const [adPosts, total] = await this.posts.findAndCount(postQuery);
+
+      const nextPage = total > page * 5 ? Number(page) + 1 : null;
+
+      return { ok: true, adPosts, nextPage };
     } catch (error) {
       return { ok: false, error, msg: '서버가 잠시 아픈거 같아요...' };
     }
