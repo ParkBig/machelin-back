@@ -75,7 +75,7 @@ export class Post {
   dislikes: Dislike[];
 
   @OneToMany((type) => Report, (report) => report.post, { eager: true })
-  report: Report;
+  report: Report[];
 
   @OneToMany((type) => Comment, (comment) => comment.postId, { eager: true })
   comments: Comment[];
