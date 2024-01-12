@@ -62,10 +62,11 @@ export class PostsService {
             isPublic: true,
             postType: 'notice',
           },
-          {
-            isPublic: true,
-            postType: 'ad',
-          },
+          /** 변경해야됌 */
+          // {
+          //   isPublic: true,
+          //   postType: 'ad',
+          // },
         ],
         relations: ['owner'],
         order: { createdAt: 'DESC' },

@@ -21,7 +21,7 @@ export class Post {
   createdAt: Date;
 
   @Column({ default: 'post' })
-  postType: 'post' | 'ad' | 'notice';
+  postType: 'post' | 'localAd' | 'allAd' | 'notice';
 
   @Column({ default: 0 })
   views: number;
