@@ -52,19 +52,23 @@ export class PostsService {
         where: [
           {
             isPublic: true,
+            hasProblem: false,
             ownerSubLocality: subLocality,
           },
           {
             isPublic: true,
+            hasProblem: false,
             restaurantSubLocality: subLocality,
           },
           {
             isPublic: true,
+            hasProblem: false,
             postType: 'notice',
           },
           /** 변경해야됌 */
           // {
           //   isPublic: true,
+          //   hasProblem: false,
           //   postType: 'ad',
           // },
         ],
@@ -82,6 +86,7 @@ export class PostsService {
         if (Array.isArray(postQuery['where'])) {
           postQuery['where'].push({
             isPublic: true,
+            hasProblem: false,
             owner: { id: In(followsIdArr) },
           });
         }
@@ -304,6 +309,11 @@ export class PostsService {
       const post = await this.posts.findOne({ where: { id: postId } });
       if (!post) {
         return { ok: false, msg: '잘못된 요청이에요!' };
+      }
+
+      if (post.report.length >= 9 && !post.hasProblem) {
+        post.hasProblem = true;
+        await this.posts.save(post);
       }
 
       await this.reports.save(
