@@ -23,6 +23,9 @@ export class Post {
   @Column({ default: 'post' })
   postType: 'post' | 'localAd' | 'allAd' | 'notice';
 
+  @Column({ default: false })
+  hasProblem: boolean;
+
   @Column({ default: 0 })
   views: number;
 
