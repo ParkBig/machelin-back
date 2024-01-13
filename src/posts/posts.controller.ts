@@ -37,6 +37,7 @@ import {
 import { SearchPostsInput, SearchPostsOutput } from './dtos/search-posts.dto';
 import { NoticePostsInput, NoticePostsOutput } from './dtos/notice-posts.dto';
 import { AdPostsInput, AdPostsOutput } from './dtos/ad-posts.dto';
+import { PostsLikedInput, PostsLikedOutput } from './dtos/posts-liked.dto';
 
 @Controller('posts')
 export class PostsController {
@@ -85,6 +86,15 @@ export class PostsController {
     @Query() searchPostsInput: SearchPostsInput,
   ): Promise<SearchPostsOutput> {
     return this.postsService.searchPosts(searchPostsInput);
+  }
+
+  @Get('postsLiked')
+  @Role(['Any'])
+  postsLiked(
+    @AuthUser() authUser: User,
+    @Query() postsLikedInput: PostsLikedInput,
+  ): Promise<PostsLikedOutput> {
+    return this.postsService.postsLiked(authUser, postsLikedInput);
   }
 
   @Get('noticePosts')

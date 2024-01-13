@@ -60,6 +60,10 @@ import {
   UsersFollowsIdInput,
   UsersFollowsIdOutput,
 } from './dtos/users-follows-id.dto';
+import {
+  UsersPostsLikedInput,
+  UsersPostsLikedOutput,
+} from './dtos/users-posts-liked.dto';
 
 @Injectable()
 export class UsersService {

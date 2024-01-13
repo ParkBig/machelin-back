@@ -33,6 +33,7 @@ import {
 import { SearchPostsInput, SearchPostsOutput } from './dtos/search-posts.dto';
 import { NoticePostsInput, NoticePostsOutput } from './dtos/notice-posts.dto';
 import { AdPostsInput, AdPostsOutput } from './dtos/ad-posts.dto';
+import { PostsLikedInput, PostsLikedOutput } from './dtos/posts-liked.dto';
 
 @Injectable()
 export class PostsService {
@@ -456,6 +457,39 @@ export class PostsService {
       const nextPage = total > page * 5 ? Number(page) + 1 : null;
 
       return { ok: true, searchPosts, nextPage, msg: 'good work' };
+    } catch (error) {
+      return { ok: false, error, msg: '서버가 잠시 아픈거 같아요...' };
+    }
+  }
+
+  async postsLiked(
+    authUser: User,
+    { page }: PostsLikedInput,
+  ): Promise<PostsLikedOutput> {
+    try {
+      if (!authUser) {
+        return { ok: false, msg: '잘못된 요청이에요!' };
+      }
+
+      const [postsLiked, total] = await this.posts.findAndCount({
+        where: {
+          likes: {
+            owner: {
+              id: authUser.id,
+            },
+          },
+          isPublic: true,
+          hasProblem: false,
+        },
+        relations: ['owner'],
+        order: { createdAt: 'DESC' },
+        skip: (page - 1) * 5,
+        take: 5,
+      });
+
+      const nextPage = total > page * 5 ? Number(page) + 1 : null;
+
+      return { ok: true, msg: 'good work', postsLiked, nextPage };
     } catch (error) {
       return { ok: false, error, msg: '서버가 잠시 아픈거 같아요...' };
     }
