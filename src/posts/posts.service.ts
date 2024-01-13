@@ -451,12 +451,6 @@ export class PostsService {
             postType: 'post',
             restaurantName: ILike(`%${keyword}%`),
           },
-          {
-            isPublic: true,
-            hasProblem: false,
-            postType: 'post',
-            hashtags: In([keyword]),
-          },
         ],
         relations: ['owner'],
         order: { createdAt: 'DESC' },
