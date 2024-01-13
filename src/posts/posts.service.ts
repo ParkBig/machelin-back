@@ -445,6 +445,18 @@ export class PostsService {
             postType: 'post',
             ownerSubLocality: ILike(`%${keyword}%`),
           },
+          {
+            isPublic: true,
+            hasProblem: false,
+            postType: 'post',
+            restaurantName: ILike(`%${keyword}%`),
+          },
+          {
+            isPublic: true,
+            hasProblem: false,
+            postType: 'post',
+            hashtags: In([keyword]),
+          },
         ],
         relations: ['owner'],
         order: { createdAt: 'DESC' },
