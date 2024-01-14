@@ -12,6 +12,14 @@ import { Like } from './like.entity';
 import { Dislike } from './dislike.entity';
 import { Report } from './report.entity';
 
+export enum PostType {
+  post = 'POST',
+  localAd = 'LOCAL_AD',
+  allAd = 'ALL_AD',
+  localNotice = 'LOCAL_NOTICE',
+  allNotice = 'ALL_NOTICE',
+}
+
 @Entity()
 export class Post {
   @PrimaryGeneratedColumn()
@@ -20,8 +28,8 @@ export class Post {
   @CreateDateColumn()
   createdAt: Date;
 
-  @Column({ default: 'post' })
-  postType: 'post' | 'localAd' | 'allAd' | 'allNotice' | 'localNotice';
+  @Column({ type: 'enum', enum: PostType, default: PostType.post })
+  postType: PostType;
 
   @Column({ default: 99999 })
   expirationDate: number;

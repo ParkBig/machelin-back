@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Post } from './entities/post.entity';
+import { Post, PostType } from './entities/post.entity';
 import { FindManyOptions, ILike, In, Repository } from 'typeorm';
 import { MakePostInput, MakePostOutput } from './dtos/make-post.dto';
 import { User } from 'src/users/entities/user.entity';
@@ -67,14 +67,14 @@ export class PostsService {
           {
             isPublic: true,
             hasProblem: false,
-            postType: 'allNotice',
+            ownerSubLocality: subLocality,
+            postType: PostType.localNotice,
           },
           {
             isPublic: true,
             hasProblem: false,
-            postType: 'localNotice',
+            postType: PostType.allNotice,
           },
-          // will add for ad
         ],
         relations: ['owner'],
         order: { createdAt: 'DESC' },
@@ -428,13 +428,13 @@ export class PostsService {
           {
             isPublic: true,
             hasProblem: false,
-            postType: 'post',
+            postType: PostType.post,
             contents: ILike(`%${keyword}%`),
           },
           {
             isPublic: true,
             hasProblem: false,
-            postType: 'post',
+            postType: PostType.post,
             owner: {
               nickname: ILike(`%${keyword}%`),
             },
@@ -442,13 +442,13 @@ export class PostsService {
           {
             isPublic: true,
             hasProblem: false,
-            postType: 'post',
+            postType: PostType.post,
             ownerSubLocality: ILike(`%${keyword}%`),
           },
           {
             isPublic: true,
             hasProblem: false,
-            postType: 'post',
+            postType: PostType.post,
             restaurantName: ILike(`%${keyword}%`),
           },
         ],
@@ -508,12 +508,12 @@ export class PostsService {
           {
             isPublic: true,
             hasProblem: false,
-            postType: 'allNotice',
+            postType: PostType.allNotice,
           },
           {
             isPublic: true,
             hasProblem: false,
-            postType: 'localNotice',
+            postType: PostType.localNotice,
           },
         ],
         relations: ['owner'],
@@ -540,12 +540,12 @@ export class PostsService {
           {
             isPublic: true,
             hasProblem: false,
-            postType: 'allAd',
+            postType: PostType.allAd,
           },
           {
             isPublic: true,
             hasProblem: false,
-            postType: 'localAd',
+            postType: PostType.localAd,
           },
         ],
         relations: ['owner'],
