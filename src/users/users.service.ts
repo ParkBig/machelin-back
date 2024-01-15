@@ -289,7 +289,6 @@ export class UsersService {
     try {
       const users = await this.users.find({
         where: { nickname: Like(`%${nickname}%`) },
-        relations: ['follows', 'followers', 'bookmarks', 'posts'],
       });
 
       return { ok: true, users, msg: 'good work' };
@@ -385,12 +384,6 @@ export class UsersService {
     try {
       const user = await this.users.findOne({
         where: { id: userId },
-        relations: [
-          'followers.bookmarks',
-          'followers.posts',
-          'followers.follows',
-          'followers.followers',
-        ],
       });
 
       return { ok: true, followers: user.followers, msg: 'good work' };
@@ -504,7 +497,6 @@ export class UsersService {
 
       const user = await this.users.findOne({
         where: { id: userId },
-        relations: ['follows'],
       });
 
       const followsIdArr = user.follows.map((user) => user.id);
