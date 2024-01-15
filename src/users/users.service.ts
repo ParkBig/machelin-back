@@ -366,6 +366,7 @@ export class UsersService {
     try {
       const user = await this.users.findOne({
         where: { id: userId },
+        relations: ['follows'],
       });
 
       return { ok: true, follows: user.follows, msg: 'good work' };
@@ -378,6 +379,7 @@ export class UsersService {
     try {
       const user = await this.users.findOne({
         where: { id: userId },
+        relations: ['followers'],
       });
 
       return { ok: true, followers: user.followers, msg: 'good work' };
