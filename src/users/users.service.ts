@@ -366,12 +366,6 @@ export class UsersService {
     try {
       const user = await this.users.findOne({
         where: { id: userId },
-        relations: [
-          'follows.bookmarks',
-          'follows.posts',
-          'follows.follows',
-          'follows.followers',
-        ],
       });
 
       return { ok: true, follows: user.follows, msg: 'good work' };
@@ -497,6 +491,7 @@ export class UsersService {
 
       const user = await this.users.findOne({
         where: { id: userId },
+        relations: ['follows'],
       });
 
       const followsIdArr = user.follows.map((user) => user.id);
