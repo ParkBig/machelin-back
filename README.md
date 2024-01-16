@@ -51,6 +51,16 @@
 
     ![내주변 식당보기 스크린-3](https://machelin-images.s3.ap-northeast-2.amazonaws.com/1-3.png)
 
+- 식당 상세보기 스크린
+
+  - 식당 상세보기 스크린-1
+
+    ![식당 상세보기 스크린-1](https://machelin-images.s3.ap-northeast-2.amazonaws.com/6-1.png)
+
+  - 식당 상세보기 스크린-2
+
+    ![식당 상세보기 스크린-2](https://s3.console.aws.amazon.com/s3/object/machelin-images?region=ap-northeast-2&bucketType=general&prefix=6-2.png)
+
 - 지역검색 식당보기 스크린
 
   - 지역검색 식당보기 스크린
@@ -59,13 +69,9 @@
 
 - 동네 게시글 보기 스크린
 
-  - 동네 게시글 보기 스크린-1
+  - 동네 게시글 보기 스크린
 
-    ![동네 게시글 보기 스크린-1](https://machelin-images.s3.ap-northeast-2.amazonaws.com/3-1.png)
-
-  - 동네 게시글 보기 스크린-2
-
-    ![동네 게시글 보기 스크린-2](https://machelin-images.s3.ap-northeast-2.amazonaws.com/3-2.png)
+    ![동네 게시글 보기 스크린](https://machelin-images.s3.ap-northeast-2.amazonaws.com/3-1.png)
 
 - 내정보(내 게시글, 북마크, 팔로우, 팔로워, 나의지도) 스크린
 
@@ -76,6 +82,14 @@
   - 내정보 스크린-2
 
     ![내정보 스크린-2](https://machelin-images.s3.ap-northeast-2.amazonaws.com/4-2.png)
+
+  - 내정보 스크린-3
+
+    ![내정보 스크린-3](https://machelin-images.s3.ap-northeast-2.amazonaws.com/4-3.png)
+
+  - 내정보 스크린-4
+
+    ![내정보 스크린-4](https://machelin-images.s3.ap-northeast-2.amazonaws.com/4-4.png)
 
 - 게시글 작성하기 스크린
 
