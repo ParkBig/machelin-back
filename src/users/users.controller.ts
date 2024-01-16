@@ -126,10 +126,13 @@ export class UsersController {
   }
 
   @Post('checkSignUpVerification')
+  @Role(['Any'])
   checkSignUpVerification(
+    @AuthUser() authUser: User,
     @Body() checkSignUpVerificationInput: CheckSignUpVerificationInput,
   ): Promise<CheckSignUpVerificationOutput> {
     return this.usersService.checkSignUpVerification(
+      authUser,
       checkSignUpVerificationInput,
     );
   }

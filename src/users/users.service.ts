@@ -404,12 +404,27 @@ export class UsersService {
   }
 
   async checkSignUpVerification(
+    authUser: User,
     checkSignupVerificationInput: CheckSignUpVerificationInput,
   ): Promise<CheckSignUpVerificationOutput> {
     try {
       const { ok, msg } = await this.twilioService.checkVerification(
         checkSignupVerificationInput,
       );
+
+      if (!ok) {
+        return { ok: false, msg };
+      }
+
+      const user = await this.users.findOne({ where: { id: authUser.id } });
+      if (!user) {
+        return { ok: false, msg: '잘못된 요청이에요' };
+      }
+
+      user.isVerified = true;
+      user.mobile = checkSignupVerificationInput.phoneNumber;
+
+      await this.users.save(user);
 
       return { ok, msg };
     } catch (error) {
