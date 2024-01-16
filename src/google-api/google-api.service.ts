@@ -83,7 +83,7 @@ export class GoogleApiService {
         query: keyword,
         key: this.googleKey,
         language: 'ko',
-        type: isRestaurant ? 'restaurant' : '',
+        type: isRestaurant === true ? 'restaurant' : '',
       };
       const toNextPageParams = nextPageParams
         ? `&pagetoken=${nextPageParams}`
