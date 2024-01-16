@@ -40,12 +40,18 @@ export class User {
   @DeleteDateColumn()
   deletedAt: Date | null;
 
+  @Column({ nullable: true })
+  latestLogin: Date;
+
   @Column({ type: 'enum', enum: UserRole, default: UserRole.user })
   @IsEnum(UserRole)
   role: UserRole;
 
-  @Column()
+  @Column({ nullable: true })
   mobile: string;
+
+  @Column({ default: false })
+  isVerified: boolean;
 
   @Column()
   loginId: string;

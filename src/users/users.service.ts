@@ -60,10 +60,6 @@ import {
   UsersFollowsIdInput,
   UsersFollowsIdOutput,
 } from './dtos/users-follows-id.dto';
-import {
-  UsersPostsLikedInput,
-  UsersPostsLikedOutput,
-} from './dtos/users-posts-liked.dto';
 
 @Injectable()
 export class UsersService {
@@ -79,7 +75,6 @@ export class UsersService {
     loginId,
     password,
     nickname,
-    mobile,
   }: SignUpInput): Promise<SignUpOutput> {
     try {
       const existingUser = await this.users.findOne({
@@ -90,9 +85,7 @@ export class UsersService {
         return { ok: false, msg: '이미 존재하는 아이디입니다.' };
       }
 
-      await this.users.save(
-        this.users.create({ loginId, password, nickname, mobile }),
-      );
+      await this.users.save(this.users.create({ loginId, password, nickname }));
 
       return { ok: true, msg: 'good work' };
     } catch (error) {
