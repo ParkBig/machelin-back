@@ -338,6 +338,29 @@ export class PostsService {
     return usersPosts;
   }
 
+  async restaurantPostsRatingNTotal(restaurantId: string) {
+    try {
+      const query: FindManyOptions<Post> = {
+        where: { restaurantId, isPublic: true },
+        relations: ['owner'],
+        order: { createdAt: 'DESC' },
+      };
+
+      const [posts, total] = await this.posts.findAndCount(query);
+
+      if (total === 0) {
+        return { rating: 0, total: 0 };
+      } else {
+        let rating = 0;
+        posts.forEach((post) => (rating += post.rating));
+
+        return { rating: rating / total, total };
+      }
+    } catch (error) {
+      return { ok: false, error, msg: '서버가 잠시 아픈거 같아요...' };
+    }
+  }
+
   async findRestaurantPosts(restaurantId: string, page: number) {
     try {
       const query: FindManyOptions<Post> = {

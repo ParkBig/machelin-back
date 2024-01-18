@@ -69,9 +69,16 @@ export class RestaurantsService {
         restaurantDetailInput,
       );
 
+      const { rating, total } =
+        await this.postsService.restaurantPostsRatingNTotal(
+          restaurantDetailInput.restaurantId,
+        );
+
       return {
         ok: true,
         restaurantDetail,
+        machelinRating: rating,
+        machelinTotal: total,
         msg: 'good work',
       };
     } catch (error) {

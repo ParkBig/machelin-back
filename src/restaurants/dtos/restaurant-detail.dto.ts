@@ -7,4 +7,6 @@ export class RestaurantDetailInput {
 
 export class RestaurantDetailOutput extends CommonOutput {
   restaurantDetail?: GooglePlace;
+  machelinRating?: number;
+  machelinTotal?: number;
 }
