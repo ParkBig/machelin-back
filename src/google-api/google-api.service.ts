@@ -83,7 +83,7 @@ export class GoogleApiService {
         query: keyword,
         key: this.googleKey,
         language: 'ko',
-        type: isRestaurant === true ? 'restaurant' : '',
+        type: isRestaurant === 'true' ? 'restaurant' : '',
       };
       const toNextPageParams = nextPageParams
         ? `&pagetoken=${nextPageParams}`
@@ -137,9 +137,12 @@ export class GoogleApiService {
       const requestUrl = `${this.reverseGeocodingUrl}${queryString}`;
       const response = await axios.get(requestUrl);
       const results = response.data.results;
-      const subLocality = results[results.length - 4].formatted_address;
 
-      return { subLocality };
+      const localityArr =
+        results[results.length - 5].formatted_address.split(' ');
+      const isKorea = localityArr[0] === '대한민국' ? true : false;
+
+      return { ok: true, localityArr, isKorea, msg: 'good work' };
     } catch (error) {
       return { ok: false, error, msg: '서버가 잠시 아픈거 같아요...' };
     }

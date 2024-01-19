@@ -480,12 +480,17 @@ export class UsersService {
     lng,
   }: UsersSubLocalityInput): Promise<UsersSubLocalityOutput> {
     try {
-      const { subLocality } = await this.googleApiService.reverseGeocoding({
-        lat,
-        lng,
-      });
+      const { ok, msg, localityArr, isKorea } =
+        await this.googleApiService.reverseGeocoding({
+          lat,
+          lng,
+        });
 
-      return { ok: true, msg: 'good work', subLocality };
+      if (!ok) {
+        return { ok, msg, localityArr: null, isKorea: null };
+      }
+
+      return { ok: true, msg: 'good work', localityArr, isKorea };
     } catch (error) {
       return { ok: false, error, msg: '서버가 잠시 아픈거 같아요...' };
     }

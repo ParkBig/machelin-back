@@ -6,5 +6,6 @@ export class ReverseGeocodingInput {
 }
 
 export class ReverseGeocodingOutput extends CommonOutput {
-  subLocality?: string;
+  localityArr?: string[];
+  isKorea?: boolean;
 }

@@ -1,7 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Post, PostType } from './entities/post.entity';
-import { FindManyOptions, ILike, In, Repository } from 'typeorm';
+import {
+  FindManyOptions,
+  ILike,
+  Like as TypeormLike,
+  In,
+  Repository,
+} from 'typeorm';
 import { MakePostInput, MakePostOutput } from './dtos/make-post.dto';
 import { User } from 'src/users/entities/user.entity';
 import { ReportPostInput, ReportPostOutput } from './dtos/report-post.dto';
@@ -57,17 +63,17 @@ export class PostsService {
           {
             isPublic: true,
             hasProblem: false,
-            ownerSubLocality: subLocality,
+            ownerSubLocality: TypeormLike(`%${subLocality}%`),
           },
           {
             isPublic: true,
             hasProblem: false,
-            restaurantSubLocality: subLocality,
+            restaurantSubLocality: TypeormLike(`%${subLocality}%`),
           },
           {
             isPublic: true,
             hasProblem: false,
-            ownerSubLocality: subLocality,
+            ownerSubLocality: TypeormLike(`%${subLocality}%`),
             postType: PostType.localNotice,
           },
           {
@@ -131,19 +137,12 @@ export class PostsService {
         restaurantId,
         restaurantName,
         restaurantAddress,
-        userLat,
-        userLng,
+        ownerSubLocality,
       } = makePostInput;
 
       const hashtagArr = hashtags
         .match(/#[^\s,#]+/g)
         ?.map((tag) => tag.replace('#', '').trim());
-
-      const { subLocality: ownerSubLocality } =
-        await this.googleApiService.reverseGeocoding({
-          lat: userLat,
-          lng: userLng,
-        });
 
       const postColumn = {
         images: imageUrls,
@@ -156,11 +155,21 @@ export class PostsService {
       };
 
       if (hasRestaurantTag) {
-        const { subLocality: restaurantSubLocality } =
+        const { ok, localityArr, isKorea } =
           await this.googleApiService.reverseGeocoding({
             lat: restaurantLat,
             lng: restaurantLng,
           });
+
+        let restaurantSubLocality = '';
+
+        if (!ok) {
+          restaurantSubLocality = ownerSubLocality;
+        } else if (!isKorea) {
+          restaurantSubLocality = localityArr[0];
+        } else {
+          restaurantSubLocality = localityArr.slice(0, -1).join(' ');
+        }
 
         const postRestaurantInfoColumn = {
           restaurantId,

@@ -6,5 +6,6 @@ export class UsersSubLocalityInput {
 }
 
 export class UsersSubLocalityOutput extends CommonOutput {
-  subLocality?: string;
+  localityArr?: string[];
+  isKorea?: boolean;
 }

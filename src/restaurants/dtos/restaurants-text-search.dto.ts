@@ -6,8 +6,8 @@ export class RestaurantsTextSearchInput {
   @IsString()
   keyword: string;
 
-  @IsBoolean()
-  isRestaurant: boolean;
+  @IsString()
+  isRestaurant: string;
 
   @IsOptional()
   nextPageParams: string;

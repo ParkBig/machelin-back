@@ -43,10 +43,7 @@ export class MakePostInput {
   isPublic: string;
 
   @IsString()
-  userLat: string;
-
-  @IsString()
-  userLng: string;
+  ownerSubLocality: string;
 }
 
 export class MakePostOutput extends CommonOutput {}
