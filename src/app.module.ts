@@ -21,6 +21,7 @@ import { Bookmark } from './bookmarks/entities/bookmark.entity';
 import { GoogleApiModule } from './google-api/google-api.module';
 import { StampsModule } from './stamps/stamps.module';
 import { Stamp } from './stamps/entities/stamp.entity';
+import { VersionsModule } from './versions/versions.module';
 
 @Module({
   imports: [
@@ -82,6 +83,7 @@ import { Stamp } from './stamps/entities/stamp.entity';
     S3ServiceModule,
     GoogleApiModule,
     StampsModule,
+    VersionsModule,
   ],
   controllers: [],
   providers: [],
