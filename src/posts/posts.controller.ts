@@ -38,14 +38,16 @@ import { SearchPostsInput, SearchPostsOutput } from './dtos/search-posts.dto';
 import { NoticePostsInput, NoticePostsOutput } from './dtos/notice-posts.dto';
 import { AdPostsInput, AdPostsOutput } from './dtos/ad-posts.dto';
 import { PostsLikedInput, PostsLikedOutput } from './dtos/posts-liked.dto';
+import { AllPostsInput } from './dtos/all-posts.dto';
 
 @Controller('posts')
 export class PostsController {
   constructor(private readonly postsService: PostsService) {}
 
-  @Get()
-  hello() {
-    return 'good work';
+  @Get('allPosts')
+  @Role(['Any'])
+  allPosts(@Query() allPostsInput: AllPostsInput) {
+    return this.postsService.allPosts(allPostsInput);
   }
 
   @Get('neighborhoodPosts')

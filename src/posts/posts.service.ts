@@ -40,6 +40,7 @@ import { SearchPostsInput, SearchPostsOutput } from './dtos/search-posts.dto';
 import { NoticePostsInput, NoticePostsOutput } from './dtos/notice-posts.dto';
 import { AdPostsInput, AdPostsOutput } from './dtos/ad-posts.dto';
 import { PostsLikedInput, PostsLikedOutput } from './dtos/posts-liked.dto';
+import { AllPostsInput, AllPostsOutput } from './dtos/all-posts.dto';
 
 @Injectable()
 export class PostsService {
@@ -52,6 +53,29 @@ export class PostsService {
     @InjectRepository(Dislike) private readonly dislikes: Repository<Dislike>,
     @InjectRepository(Report) private readonly reports: Repository<Report>,
   ) {}
+
+  async allPosts({ page }: AllPostsInput): Promise<AllPostsOutput> {
+    try {
+      const postQuery: FindManyOptions<Post> = {
+        where: {
+          isPublic: true,
+          hasProblem: false,
+        },
+        relations: ['owner'],
+        order: { createdAt: 'DESC' },
+        skip: (page - 1) * 5,
+        take: 5,
+      };
+
+      const [allPosts, total] = await this.posts.findAndCount(postQuery);
+
+      const nextPage = total > page * 5 ? Number(page) + 1 : null;
+
+      return { ok: true, allPosts, nextPage, msg: 'good work' };
+    } catch (error) {
+      return { ok: false, error, msg: '서버가 잠시 아픈거 같아요...' };
+    }
+  }
 
   async neighborhoodPosts(
     authUser: User,
