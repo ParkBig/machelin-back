@@ -1,5 +1,5 @@
 import { CommonOutput } from 'src/common/dtos/output.dto';
-import { IsBoolean, IsOptional, IsString } from 'class-validator';
+import { IsOptional, IsString } from 'class-validator';
 import { GooglePlace } from 'src/google-api/dtos/google-place-dto';
 
 export class RestaurantsTextSearchInput {
@@ -8,6 +8,10 @@ export class RestaurantsTextSearchInput {
 
   @IsString()
   isRestaurant: string;
+
+  @IsOptional()
+  @IsString()
+  radius: string;
 
   @IsOptional()
   nextPageParams: string;

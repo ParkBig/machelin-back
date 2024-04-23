@@ -76,10 +76,11 @@ export class GoogleApiService {
     keyword,
     isRestaurant,
     nextPageParams,
+    radius,
   }: TextSearchInput): Promise<TextSearchOutput> {
     try {
       const params = {
-        radius: '50000',
+        radius: radius ? radius : '50000',
         query: keyword,
         key: this.googleKey,
         language: 'ko',
