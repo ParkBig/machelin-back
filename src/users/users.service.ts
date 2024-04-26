@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Like, Repository } from 'typeorm';
+import { ILike, Repository } from 'typeorm';
 import { LoginInput, LoginOutput } from './dtos/login.dto';
 import { JwtService } from 'src/jwt/jwt.service';
 import { UserProfileOutput } from './dtos/user-profile.dto';
@@ -281,7 +281,7 @@ export class UsersService {
   async findUsers(nickname: string): Promise<NicknameOutput> {
     try {
       const users = await this.users.find({
-        where: { nickname: Like(`%${nickname}%`) },
+        where: { nickname: ILike(`%${nickname}%`) },
       });
 
       return { ok: true, users, msg: 'good work' };
