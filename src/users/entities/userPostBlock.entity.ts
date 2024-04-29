@@ -1,6 +1,6 @@
-import { Post } from 'src/posts/entities/post.entity';
 import { User } from 'src/users/entities/user.entity';
 import {
+  Column,
   CreateDateColumn,
   Entity,
   ManyToOne,
@@ -8,22 +8,19 @@ import {
 } from 'typeorm';
 
 @Entity()
-export class PostBlock {
+export class UserPostBlock {
   @PrimaryGeneratedColumn()
   id: number;
 
   @CreateDateColumn()
   createdAt: Date;
 
-  @ManyToOne((type) => Post, (post) => post.postBlocks, {
-    onDelete: 'CASCADE',
-    nullable: false,
-  })
-  post: Post;
-
-  @ManyToOne((type) => User, (user) => user.postBlocks, {
+  @ManyToOne((type) => User, (user) => user.userPostBlocks, {
     onDelete: 'CASCADE',
     nullable: false,
   })
   owner: User;
+
+  @Column()
+  blockedPostId: number;
 }

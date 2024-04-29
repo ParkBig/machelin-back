@@ -22,8 +22,8 @@ import { GoogleApiModule } from './google-api/google-api.module';
 import { StampsModule } from './stamps/stamps.module';
 import { Stamp } from './stamps/entities/stamp.entity';
 import { VersionsModule } from './versions/versions.module';
-import { PostBlock } from './posts/entities/postblock.entity';
 import { UserBlock } from './users/entities/userBlock.entity';
+import { UserPostBlock } from './users/entities/userPostBlock.entity';
 
 @Module({
   imports: [
@@ -79,7 +79,7 @@ import { UserBlock } from './users/entities/userBlock.entity';
         Report,
         Dislike,
         Stamp,
-        PostBlock,
+        UserPostBlock,
         UserBlock,
       ],
     }),

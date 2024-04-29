@@ -20,8 +20,8 @@ import { Like } from 'src/posts/entities/like.entity';
 import { Report } from 'src/posts/entities/report.entity';
 import { Bookmark } from 'src/bookmarks/entities/bookmark.entity';
 import { Stamp } from 'src/stamps/entities/stamp.entity';
-import { PostBlock } from 'src/posts/entities/postblock.entity';
 import { UserBlock } from './userBlock.entity';
+import { UserPostBlock } from './userPostBlock.entity';
 
 export enum UserRole {
   admin = 'ADMIN',
@@ -115,8 +115,8 @@ export class User {
   @OneToMany((type) => Report, (report) => report.owner)
   reports: Report[];
 
-  @OneToMany((type) => PostBlock, (postBlock) => postBlock.owner)
-  postBlocks: PostBlock[];
+  @OneToMany((type) => UserPostBlock, (userPostBlock) => userPostBlock.owner)
+  userPostBlocks: UserPostBlock[];
 
   @OneToMany((type) => UserBlock, (userBlock) => userBlock.owner)
   userBlocks: UserBlock[];
