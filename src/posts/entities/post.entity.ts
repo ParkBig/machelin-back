@@ -11,6 +11,7 @@ import {
 import { Like } from './like.entity';
 import { Dislike } from './dislike.entity';
 import { Report } from './report.entity';
+import { PostBlock } from './postblock.entity';
 
 export enum PostType {
   post = 'POST',
@@ -82,14 +83,17 @@ export class Post {
   @OneToMany((type) => Like, (like) => like.post, { eager: true })
   likes: Like[];
 
-  @OneToMany((type) => Dislike, (like) => like.post, { eager: true })
+  @OneToMany((type) => Dislike, (like) => like.post)
   dislikes: Dislike[];
 
-  @OneToMany((type) => Report, (report) => report.post, { eager: true })
-  report: Report[];
-
-  @OneToMany((type) => Comment, (comment) => comment.postId, { eager: true })
+  @OneToMany((type) => Comment, (comment) => comment.postId)
   comments: Comment[];
+
+  @OneToMany((type) => Report, (report) => report.post)
+  reports: Report[];
+
+  @OneToMany((type) => PostBlock, (postBlock) => postBlock.post)
+  postBlocks: PostBlock[];
 
   @ManyToOne((type) => User, (user) => user.posts, {
     onDelete: 'CASCADE',

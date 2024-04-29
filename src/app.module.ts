@@ -22,6 +22,8 @@ import { GoogleApiModule } from './google-api/google-api.module';
 import { StampsModule } from './stamps/stamps.module';
 import { Stamp } from './stamps/entities/stamp.entity';
 import { VersionsModule } from './versions/versions.module';
+import { PostBlock } from './posts/entities/postblock.entity';
+import { UserBlock } from './users/entities/userBlock.entity';
 
 @Module({
   imports: [
@@ -68,7 +70,18 @@ import { VersionsModule } from './versions/versions.module';
       logging:
         process.env.NODE_ENV !== 'production' &&
         process.env.NODE_ENV !== 'test',
-      entities: [User, Post, Bookmark, Comment, Like, Report, Dislike, Stamp],
+      entities: [
+        User,
+        Post,
+        Bookmark,
+        Comment,
+        Like,
+        Report,
+        Dislike,
+        Stamp,
+        PostBlock,
+        UserBlock,
+      ],
     }),
     JwtModule.forRoot({
       privateKey: process.env.POSTGRES_PRIVATE_KEY,

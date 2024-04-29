@@ -1,7 +1,6 @@
 import { Post } from 'src/posts/entities/post.entity';
 import { User } from 'src/users/entities/user.entity';
 import {
-  Column,
   CreateDateColumn,
   Entity,
   ManyToOne,
@@ -9,23 +8,20 @@ import {
 } from 'typeorm';
 
 @Entity()
-export class Report {
+export class PostBlock {
   @PrimaryGeneratedColumn()
   id: number;
 
   @CreateDateColumn()
   createdAt: Date;
 
-  @Column()
-  report: string;
-
-  @ManyToOne((type) => Post, (post) => post.reports, {
+  @ManyToOne((type) => Post, (post) => post.postBlocks, {
     onDelete: 'CASCADE',
     nullable: false,
   })
   post: Post;
 
-  @ManyToOne((type) => User, (user) => user.reports, {
+  @ManyToOne((type) => User, (user) => user.postBlocks, {
     onDelete: 'CASCADE',
     nullable: false,
   })

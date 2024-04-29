@@ -343,12 +343,15 @@ export class PostsService {
         return { ok: false, msg: '잘못된 요청이에요!' };
       }
 
-      const post = await this.posts.findOne({ where: { id: postId } });
+      const post = await this.posts.findOne({
+        where: { id: postId },
+        relations: ['reports'],
+      });
       if (!post) {
         return { ok: false, msg: '잘못된 요청이에요!' };
       }
 
-      if (post.report.length >= 9 && !post.hasProblem) {
+      if (post.reports.length >= 9 && !post.hasProblem) {
         post.hasProblem = true;
         await this.posts.save(post);
       }
