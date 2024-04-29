@@ -59,12 +59,13 @@ import {
   UsersSubLocalityInput,
   UsersSubLocalityOutput,
 } from './dtos/users-sub-locality.dto';
+import { ToggleUserPostBlockInput } from './dtos/toggle-user-post-block.dto';
+import { MyBlockedPostsOutput } from './dtos/my-blocked-posts.dto';
 
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
-  // Get~
   @Get()
   hello() {
     return 'good work';
@@ -105,7 +106,6 @@ export class UsersController {
     return this.usersService.usersSubLocality(usersSubLocalityInput);
   }
 
-  // Post~
   @Post('signUp')
   signUp(@Body() signUpInput: SignUpInput): Promise<SignUpOutput> {
     return this.usersService.signUp(signUpInput);
@@ -213,6 +213,12 @@ export class UsersController {
     );
   }
 
+  @Get('myBlockedPosts')
+  @Role(['Any'])
+  myBlockedPosts(@AuthUser() authUser: User): Promise<MyBlockedPostsOutput> {
+    return this.usersService.myBlockedPosts(authUser);
+  }
+
   @Post('toggleFriendState')
   @Role(['Any'])
   toggleFriendState(
@@ -222,6 +228,18 @@ export class UsersController {
     return this.usersService.toggleFriendState(
       authUser,
       toggleFriendStateInput,
+    );
+  }
+
+  @Post('toggleUserPostBlock')
+  @Role(['Any'])
+  toggleUserPostBlock(
+    @AuthUser() authUser: User,
+    @Body() toggleUserPostBlockInput: ToggleUserPostBlockInput,
+  ): Promise<ToggleFriendStateOutput> {
+    return this.usersService.toggleUserPostBlock(
+      authUser,
+      toggleUserPostBlockInput,
     );
   }
 

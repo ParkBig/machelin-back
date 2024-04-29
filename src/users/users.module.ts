@@ -6,9 +6,11 @@ import { User } from './entities/user.entity';
 import { S3ServiceService } from 'src/s3-service/s3-service.service';
 import { TwilioService } from 'src/twilio/twilio.service';
 import { GoogleApiService } from 'src/google-api/google-api.service';
+import { UserPostBlock } from './entities/userPostBlock.entity';
+import { UserBlock } from './entities/userBlock.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([User])],
+  imports: [TypeOrmModule.forFeature([User, UserPostBlock, UserBlock])],
   controllers: [UsersController],
   providers: [UsersService, S3ServiceService, TwilioService, GoogleApiService],
   exports: [UsersService],

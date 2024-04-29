@@ -10,10 +10,18 @@ import { Report } from './entities/report.entity';
 import { S3ServiceService } from 'src/s3-service/s3-service.service';
 import { GoogleApiService } from 'src/google-api/google-api.service';
 import { UsersModule } from 'src/users/users.module';
+import { UserPostBlock } from 'src/users/entities/userPostBlock.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Post, User, Like, Dislike, Report]),
+    TypeOrmModule.forFeature([
+      Post,
+      User,
+      Like,
+      Dislike,
+      Report,
+      UserPostBlock,
+    ]),
     UsersModule,
   ],
   controllers: [PostsController],

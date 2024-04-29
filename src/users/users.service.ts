@@ -60,6 +60,10 @@ import {
   UsersFollowsIdInput,
   UsersFollowsIdOutput,
 } from './dtos/users-follows-id.dto';
+import { UserPostBlock } from './entities/userPostBlock.entity';
+import { UserBlock } from './entities/userBlock.entity';
+import { ToggleUserPostBlockInput } from './dtos/toggle-user-post-block.dto';
+import { MyBlockedPostsOutput } from './dtos/my-blocked-posts.dto';
 
 @Injectable()
 export class UsersService {
@@ -69,6 +73,10 @@ export class UsersService {
     private readonly jwtService: JwtService,
     private readonly googleApiService: GoogleApiService,
     @InjectRepository(User) private readonly users: Repository<User>,
+    @InjectRepository(UserBlock)
+    private readonly userBlock: Repository<UserBlock>,
+    @InjectRepository(UserPostBlock)
+    private readonly userPostBlock: Repository<UserPostBlock>,
   ) {}
 
   async signUp({
@@ -512,6 +520,76 @@ export class UsersService {
       const followsIdArr = user.follows.map((user) => user.id);
 
       return { followsIdArr };
+    } catch (error) {
+      return { ok: false, error, msg: '서버가 잠시 아픈거 같아요...' };
+    }
+  }
+
+  async myBlockedPosts(authUser: User): Promise<MyBlockedPostsOutput> {
+    try {
+      const user = await this.users.findOne({ where: { id: authUser.id } });
+      if (!user) {
+        return { ok: false, myBlockedPosts: [], msg: 'good work!' };
+      }
+
+      const myBlockedPosts = await this.userPostBlock.find({
+        where: { owner: { id: authUser.id } },
+      });
+
+      return { ok: false, myBlockedPosts, msg: 'good work!' };
+    } catch (error) {
+      return { ok: false, error, msg: '서버가 잠시 아픈거 같아요...' };
+    }
+  }
+
+  async toggleUserPostBlock(
+    authUser: User,
+    { postId }: ToggleUserPostBlockInput,
+  ): Promise<CommonOutput> {
+    try {
+      const user = await this.users.findOne({ where: { id: authUser.id } });
+      if (!user) {
+        return { ok: false, msg: '로그인 후 이용가능합니다.' };
+      }
+
+      const userPostBlock = await this.userPostBlock.findOne({
+        where: { owner: { id: authUser.id }, blockedPostId: postId },
+      });
+
+      if (!userPostBlock) {
+        await this.userPostBlock.save(
+          this.userPostBlock.create({ blockedPostId: postId, owner: authUser }),
+        );
+      } else {
+        await this.userPostBlock.remove(userPostBlock);
+      }
+
+      return { ok: true, msg: 'good work!' };
+    } catch (error) {
+      return { ok: false, error, msg: '서버가 잠시 아픈거 같아요...' };
+    }
+  }
+
+  async toggleUserBlock(authUser: User, userId: number): Promise<CommonOutput> {
+    try {
+      const user = await this.users.findOne({ where: { id: authUser.id } });
+      if (!user) {
+        return { ok: false, msg: '로그인 후 이용가능합니다.' };
+      }
+
+      const userBlock = await this.userBlock.findOne({
+        where: { owner: { id: authUser.id }, blockedUserId: userId },
+      });
+
+      if (!userBlock) {
+        await this.userBlock.save(
+          this.userBlock.create({ blockedUserId: userId, owner: authUser }),
+        );
+      } else {
+        await this.userBlock.remove(userBlock);
+      }
+
+      return { ok: true, msg: 'good work!' };
     } catch (error) {
       return { ok: false, error, msg: '서버가 잠시 아픈거 같아요...' };
     }

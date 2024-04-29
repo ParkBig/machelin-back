@@ -7,6 +7,7 @@ import {
   Like as TypeormLike,
   In,
   Repository,
+  Not,
 } from 'typeorm';
 import { MakePostInput, MakePostOutput } from './dtos/make-post.dto';
 import { User } from 'src/users/entities/user.entity';
@@ -41,6 +42,7 @@ import { NoticePostsInput, NoticePostsOutput } from './dtos/notice-posts.dto';
 import { AdPostsInput, AdPostsOutput } from './dtos/ad-posts.dto';
 import { PostsLikedInput, PostsLikedOutput } from './dtos/posts-liked.dto';
 import { AllPostsInput, AllPostsOutput } from './dtos/all-posts.dto';
+import { UserPostBlock } from 'src/users/entities/userPostBlock.entity';
 
 @Injectable()
 export class PostsService {
@@ -52,20 +54,47 @@ export class PostsService {
     @InjectRepository(Like) private readonly likes: Repository<Like>,
     @InjectRepository(Dislike) private readonly dislikes: Repository<Dislike>,
     @InjectRepository(Report) private readonly reports: Repository<Report>,
+    @InjectRepository(UserPostBlock)
+    private readonly userPostBlock: Repository<UserPostBlock>,
   ) {}
 
-  async allPosts({ page }: AllPostsInput): Promise<AllPostsOutput> {
+  async allPosts(
+    authUser: User,
+    { page }: AllPostsInput,
+  ): Promise<AllPostsOutput> {
     try {
       const postQuery: FindManyOptions<Post> = {
-        where: {
-          isPublic: true,
-          hasProblem: false,
-        },
+        where: [],
         relations: ['owner'],
         order: { createdAt: 'DESC' },
         skip: (page - 1) * 5,
         take: 5,
       };
+
+      if (authUser) {
+        const userPostBlock = await this.userPostBlock.find({
+          where: { owner: { id: authUser.id } },
+          select: ['blockedPostId'],
+        });
+        const userPostBlockIdArr = userPostBlock.map(
+          (item) => item.blockedPostId,
+        );
+
+        if (Array.isArray(postQuery['where'])) {
+          postQuery['where'].push({
+            isPublic: true,
+            hasProblem: false,
+            id: Not(In(userPostBlockIdArr)),
+          });
+        }
+      } else {
+        if (Array.isArray(postQuery['where'])) {
+          postQuery['where'].push({
+            isPublic: true,
+            hasProblem: false,
+          });
+        }
+      }
 
       const [allPosts, total] = await this.posts.findAndCount(postQuery);
 
@@ -83,7 +112,66 @@ export class PostsService {
   ): Promise<NeighborhoodPostsOutput> {
     try {
       const postQuery: FindManyOptions<Post> = {
-        where: [
+        where: [],
+        relations: ['owner'],
+        order: { createdAt: 'DESC' },
+        skip: (page - 1) * 5,
+        take: 5,
+      };
+
+      if (authUser) {
+        const userPostBlock = await this.userPostBlock.find({
+          where: { owner: { id: authUser.id } },
+          select: ['blockedPostId'],
+        });
+        const userPostBlockIdArr = userPostBlock.map(
+          (item) => item.blockedPostId,
+        );
+        const { followsIdArr } = await this.usersService.usersFollowsPosts({
+          userId: authUser.id,
+        });
+
+        const conditions = [
+          {
+            isPublic: true,
+            hasProblem: false,
+            ownerSubLocality: TypeormLike(`%${subLocality}%`),
+            id: Not(In(userPostBlockIdArr)),
+          },
+          {
+            isPublic: true,
+            hasProblem: false,
+            restaurantSubLocality: TypeormLike(`%${subLocality}%`),
+            id: Not(In(userPostBlockIdArr)),
+          },
+          {
+            isPublic: true,
+            hasProblem: false,
+            ownerSubLocality: TypeormLike(`%${subLocality}%`),
+            postType: PostType.localNotice,
+            id: Not(In(userPostBlockIdArr)),
+          },
+          {
+            isPublic: true,
+            hasProblem: false,
+            postType: PostType.allNotice,
+            id: Not(In(userPostBlockIdArr)),
+          },
+          {
+            isPublic: true,
+            hasProblem: false,
+            owner: { id: In(followsIdArr) },
+            id: Not(In(userPostBlockIdArr)),
+          },
+        ];
+
+        conditions.forEach((condition) => {
+          if (Array.isArray(postQuery['where'])) {
+            return postQuery['where'].push(condition);
+          }
+        });
+      } else {
+        const conditions = [
           {
             isPublic: true,
             hasProblem: false,
@@ -105,25 +193,13 @@ export class PostsService {
             hasProblem: false,
             postType: PostType.allNotice,
           },
-        ],
-        relations: ['owner'],
-        order: { createdAt: 'DESC' },
-        skip: (page - 1) * 5,
-        take: 5,
-      };
+        ];
 
-      if (authUser) {
-        const { followsIdArr } = await this.usersService.usersFollowsPosts({
-          userId: authUser.id,
+        conditions.forEach((condition) => {
+          if (Array.isArray(postQuery['where'])) {
+            return postQuery['where'].push(condition);
+          }
         });
-
-        if (Array.isArray(postQuery['where'])) {
-          postQuery['where'].push({
-            isPublic: true,
-            hasProblem: false,
-            owner: { id: In(followsIdArr) },
-          });
-        }
       }
 
       const [neighborhoodPosts, total] = await this.posts.findAndCount(

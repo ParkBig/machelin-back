@@ -46,8 +46,8 @@ export class PostsController {
 
   @Get('allPosts')
   @Role(['Any'])
-  allPosts(@Query() allPostsInput: AllPostsInput) {
-    return this.postsService.allPosts(allPostsInput);
+  allPosts(@AuthUser() authUser: User, @Query() allPostsInput: AllPostsInput) {
+    return this.postsService.allPosts(authUser, allPostsInput);
   }
 
   @Get('neighborhoodPosts')
