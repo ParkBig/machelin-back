@@ -1,8 +1,8 @@
 import { CommonOutput } from 'src/common/dtos/output.dto';
-import { User } from '../entities/user.entity';
+import { Follow } from '../entities/follow.entity';
 
 export class UsersFollowsInput {}
 
 export class UsersFollowsOutput extends CommonOutput {
-  follows?: User[];
+  follows?: Follow[];
 }

@@ -61,6 +61,10 @@ import {
 } from './dtos/users-sub-locality.dto';
 import { ToggleUserPostBlockInput } from './dtos/toggle-user-post-block.dto';
 import { MyBlockedPostsOutput } from './dtos/my-blocked-posts.dto';
+import {
+  ToggleUserBlockInput,
+  ToggleUserBlockOutput,
+} from './dtos/toggle-user-block.dto';
 
 @Controller('users')
 export class UsersController {
@@ -104,6 +108,12 @@ export class UsersController {
     @Query() usersSubLocalityInput: UsersSubLocalityInput,
   ): Promise<UsersSubLocalityOutput> {
     return this.usersService.usersSubLocality(usersSubLocalityInput);
+  }
+
+  @Get('myBlockedUsers')
+  @Role(['Any'])
+  myBlockedUsers(@AuthUser() authUser: User) {
+    return this.usersService.myBlockedUsers(authUser);
   }
 
   @Post('signUp')
@@ -241,6 +251,15 @@ export class UsersController {
       authUser,
       toggleUserPostBlockInput,
     );
+  }
+
+  @Post('toggleUserBlock')
+  @Role(['Any'])
+  toggleUserBlock(
+    @AuthUser() authUser: User,
+    @Body() toggleUserBlockInput: ToggleUserBlockInput,
+  ): Promise<ToggleUserBlockOutput> {
+    return this.usersService.toggleUserBlock(authUser, toggleUserBlockInput);
   }
 
   @Delete('withdrawal')

@@ -43,6 +43,7 @@ import { AdPostsInput, AdPostsOutput } from './dtos/ad-posts.dto';
 import { PostsLikedInput, PostsLikedOutput } from './dtos/posts-liked.dto';
 import { AllPostsInput, AllPostsOutput } from './dtos/all-posts.dto';
 import { UserPostBlock } from 'src/users/entities/userPostBlock.entity';
+import { UserBlock } from 'src/users/entities/userBlock.entity';
 
 @Injectable()
 export class PostsService {
@@ -56,6 +57,8 @@ export class PostsService {
     @InjectRepository(Report) private readonly reports: Repository<Report>,
     @InjectRepository(UserPostBlock)
     private readonly userPostBlock: Repository<UserPostBlock>,
+    @InjectRepository(UserBlock)
+    private readonly userBlock: Repository<UserBlock>,
   ) {}
 
   async allPosts(
@@ -67,8 +70,8 @@ export class PostsService {
         where: [],
         relations: ['owner'],
         order: { createdAt: 'DESC' },
-        skip: (page - 1) * 5,
-        take: 5,
+        skip: (page - 1) * 10,
+        take: 10,
       };
 
       if (authUser) {
@@ -80,11 +83,18 @@ export class PostsService {
           (item) => item.blockedPostId,
         );
 
+        const userBlock = await this.userBlock.find({
+          where: { owner: { id: authUser.id } },
+          select: ['blockedUserId'],
+        });
+        const userBlockIdArr = userBlock.map((item) => item.blockedUserId);
+
         if (Array.isArray(postQuery['where'])) {
           postQuery['where'].push({
             isPublic: true,
             hasProblem: false,
             id: Not(In(userPostBlockIdArr)),
+            owner: { id: Not(In(userBlockIdArr)) },
           });
         }
       } else {
@@ -98,7 +108,7 @@ export class PostsService {
 
       const [allPosts, total] = await this.posts.findAndCount(postQuery);
 
-      const nextPage = total > page * 5 ? Number(page) + 1 : null;
+      const nextPage = total > page * 10 ? Number(page) + 1 : null;
 
       return { ok: true, allPosts, nextPage, msg: 'good work' };
     } catch (error) {
@@ -115,8 +125,8 @@ export class PostsService {
         where: [],
         relations: ['owner'],
         order: { createdAt: 'DESC' },
-        skip: (page - 1) * 5,
-        take: 5,
+        skip: (page - 1) * 10,
+        take: 10,
       };
 
       if (authUser) {
@@ -127,9 +137,16 @@ export class PostsService {
         const userPostBlockIdArr = userPostBlock.map(
           (item) => item.blockedPostId,
         );
+
         const { followsIdArr } = await this.usersService.usersFollowsPosts({
           userId: authUser.id,
         });
+
+        const userBlock = await this.userBlock.find({
+          where: { owner: { id: authUser.id } },
+          select: ['blockedUserId'],
+        });
+        const userBlockIdArr = userBlock.map((item) => item.blockedUserId);
 
         const conditions = [
           {
@@ -137,12 +154,14 @@ export class PostsService {
             hasProblem: false,
             ownerSubLocality: TypeormLike(`%${subLocality}%`),
             id: Not(In(userPostBlockIdArr)),
+            owner: { id: Not(In(userBlockIdArr)) },
           },
           {
             isPublic: true,
             hasProblem: false,
             restaurantSubLocality: TypeormLike(`%${subLocality}%`),
             id: Not(In(userPostBlockIdArr)),
+            owner: { id: Not(In(userBlockIdArr)) },
           },
           {
             isPublic: true,
@@ -150,12 +169,14 @@ export class PostsService {
             ownerSubLocality: TypeormLike(`%${subLocality}%`),
             postType: PostType.localNotice,
             id: Not(In(userPostBlockIdArr)),
+            owner: { id: Not(In(userBlockIdArr)) },
           },
           {
             isPublic: true,
             hasProblem: false,
             postType: PostType.allNotice,
             id: Not(In(userPostBlockIdArr)),
+            owner: { id: Not(In(userBlockIdArr)) },
           },
           {
             isPublic: true,
@@ -206,7 +227,7 @@ export class PostsService {
         postQuery,
       );
 
-      const nextPage = total > page * 5 ? Number(page) + 1 : null;
+      const nextPage = total > page * 10 ? Number(page) + 1 : null;
 
       return { ok: true, neighborhoodPosts, nextPage, msg: 'good work' };
     } catch (error) {
@@ -301,12 +322,56 @@ export class PostsService {
       const isGetMyPost = targetId === myId;
 
       const postQuery: FindManyOptions<Post> = {
-        where: { owner: { id: targetId } },
+        where: [],
         relations: ['owner'],
         order: { createdAt: 'DESC' },
         skip: (page - 1) * 10,
         take: 10,
       };
+
+      if (isGetMyPost) {
+        if (Array.isArray(postQuery['where'])) {
+          postQuery['where'].push({
+            owner: { id: myId },
+          });
+        }
+      } else {
+        if (myId) {
+          const userPostBlock = await this.userPostBlock.find({
+            where: { owner: { id: myId } },
+            select: ['blockedPostId'],
+          });
+          const userPostBlockIdArr = userPostBlock.map(
+            (item) => item.blockedPostId,
+          );
+
+          const userBlock = await this.userBlock.find({
+            where: { owner: { id: myId } },
+            select: ['blockedUserId'],
+          });
+          const userBlockIdArr = userBlock.map((item) => item.blockedUserId);
+
+          if (
+            Array.isArray(postQuery['where']) &&
+            !userBlockIdArr.includes(targetId)
+          ) {
+            postQuery['where'].push({
+              owner: { id: targetId },
+              isPublic: true,
+              hasProblem: false,
+              id: Not(In(userPostBlockIdArr)),
+            });
+          }
+        } else {
+          if (Array.isArray(postQuery['where'])) {
+            postQuery['where'].push({
+              owner: { id: targetId },
+              isPublic: true,
+              hasProblem: false,
+            });
+          }
+        }
+      }
 
       if (!isGetMyPost) {
         postQuery['where']['isPublic'] = true;
@@ -473,17 +538,55 @@ export class PostsService {
     }
   }
 
-  async findRestaurantPosts(restaurantId: string, page: number) {
+  async findRestaurantPosts(
+    authUser: User,
+    restaurantId: string,
+    page: number,
+  ) {
     try {
-      const query: FindManyOptions<Post> = {
-        where: { restaurantId, isPublic: true },
+      const postQuery: FindManyOptions<Post> = {
+        where: [],
         relations: ['owner'],
         order: { createdAt: 'DESC' },
         skip: (page - 1) * 10,
         take: 10,
       };
 
-      const [restaurantPosts, total] = await this.posts.findAndCount(query);
+      if (authUser) {
+        const userPostBlock = await this.userPostBlock.find({
+          where: { owner: { id: authUser.id } },
+          select: ['blockedPostId'],
+        });
+        const userPostBlockIdArr = userPostBlock.map(
+          (item) => item.blockedPostId,
+        );
+
+        const userBlock = await this.userBlock.find({
+          where: { owner: { id: authUser.id } },
+          select: ['blockedUserId'],
+        });
+        const userBlockIdArr = userBlock.map((item) => item.blockedUserId);
+
+        if (Array.isArray(postQuery['where'])) {
+          postQuery['where'].push({
+            restaurantId,
+            isPublic: true,
+            hasProblem: false,
+            id: Not(In(userPostBlockIdArr)),
+            owner: { id: Not(In(userBlockIdArr)) },
+          });
+        }
+      } else {
+        if (Array.isArray(postQuery['where'])) {
+          postQuery['where'].push({
+            restaurantId,
+            isPublic: true,
+            hasProblem: false,
+          });
+        }
+      }
+
+      const [restaurantPosts, total] = await this.posts.findAndCount(postQuery);
 
       const nextPage = total > page * 10 ? Number(page) + 1 : null;
 

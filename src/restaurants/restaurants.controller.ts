@@ -16,6 +16,9 @@ import {
   RestaurantsTextSearchInput,
   RestaurantsTextSearchOutput,
 } from './dtos/restaurants-text-search.dto';
+import { Role } from 'src/auth/role.decorator';
+import { AuthUser } from 'src/auth/auth-user.decorator';
+import { User } from 'src/users/entities/user.entity';
 
 @Controller('restaurants')
 export class restaurantsController {
@@ -52,9 +55,14 @@ export class restaurantsController {
   }
 
   @Get('restaurantPosts')
+  @Role(['Any'])
   restaurantPosts(
+    @AuthUser() authUser: User,
     @Query() restaurantPostsInput: RestaurantPostsInput,
   ): Promise<RestaurantPostsOutput> {
-    return this.restaurantsService.restaurantPosts(restaurantPostsInput);
+    return this.restaurantsService.restaurantPosts(
+      authUser,
+      restaurantPostsInput,
+    );
   }
 }

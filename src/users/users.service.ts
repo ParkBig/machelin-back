@@ -64,6 +64,13 @@ import { UserPostBlock } from './entities/userPostBlock.entity';
 import { UserBlock } from './entities/userBlock.entity';
 import { ToggleUserPostBlockInput } from './dtos/toggle-user-post-block.dto';
 import { MyBlockedPostsOutput } from './dtos/my-blocked-posts.dto';
+import { MyBlockedUsersOutput } from './dtos/my-blocked-users.dto';
+import { Follow } from './entities/follow.entity';
+import { Follower } from './entities/follower.entity';
+import {
+  ToggleUserBlockInput,
+  ToggleUserBlockOutput,
+} from './dtos/toggle-user-block.dto';
 
 @Injectable()
 export class UsersService {
@@ -72,6 +79,8 @@ export class UsersService {
     private readonly twilioService: TwilioService,
     private readonly jwtService: JwtService,
     private readonly googleApiService: GoogleApiService,
+    @InjectRepository(Follow) private readonly follow: Repository<Follow>,
+    @InjectRepository(Follower) private readonly follower: Repository<Follower>,
     @InjectRepository(User) private readonly users: Repository<User>,
     @InjectRepository(UserBlock)
     private readonly userBlock: Repository<UserBlock>,
@@ -306,43 +315,31 @@ export class UsersService {
       if (!authUser) {
         return { ok: false, msg: '잘못된 요청이에요!' };
       }
-
-      const user = await this.users.findOne({
-        where: { id: authUser.id },
-        relations: ['follows', 'followers'],
-      });
-      const followTargetUser = await this.users.findOne({
+      const exploreUser = await this.users.findOne({
         where: { id: exploreUserId },
-        relations: ['follows', 'followers'],
       });
-      if (!user || !followTargetUser) {
-        return { ok: false, msg: '잘못된 요청이네요' };
+      if (!exploreUser) {
+        return { ok: false, msg: '잘못된 요청이에요!' };
       }
 
-      if (!user.follows) {
-        user.follows = [];
-      }
-      if (!followTargetUser.followers) {
-        followTargetUser.followers = [];
-      }
+      const follows = await this.follow.findOne({
+        where: { owner: { id: authUser.id } },
+      });
+      const followers = await this.follower.findOne({
+        where: { owner: { id: exploreUserId } },
+      });
 
-      const isFollowSoIndex = user.follows.findIndex(
-        (follow) => follow.id === exploreUserId,
-      );
-      const isTargetUsersFollowerSoIndex = followTargetUser.followers.findIndex(
-        (follower) => follower.id === authUser.id,
-      );
-
-      if (isFollowSoIndex !== -1) {
-        user.follows.splice(isFollowSoIndex, 1);
-        followTargetUser.followers.splice(isTargetUsersFollowerSoIndex, 1);
+      if (follows && followers) {
+        await this.follow.remove(follows);
+        await this.follower.remove(followers);
       } else {
-        user.follows.push(followTargetUser);
-        followTargetUser.followers.push(authUser);
+        await this.follow.save(
+          this.follow.create({ owner: authUser, follow: exploreUser }),
+        );
+        await this.follower.save(
+          this.follower.create({ owner: exploreUser, follower: authUser }),
+        );
       }
-
-      await this.users.save(user);
-      await this.users.save(followTargetUser);
 
       return { ok: true, msg: 'good work!' };
     } catch (error) {
@@ -365,12 +362,11 @@ export class UsersService {
 
   async usersFollows(userId: number): Promise<UsersFollowsOutput> {
     try {
-      const user = await this.users.findOne({
-        where: { id: userId },
-        relations: ['follows'],
+      const follows = await this.follow.find({
+        where: { owner: { id: userId } },
       });
 
-      return { ok: true, follows: user.follows, msg: 'good work' };
+      return { ok: true, follows, msg: 'good work' };
     } catch (error) {
       return { ok: false, error, msg: '서버가 잠시 아픈거 같아요...' };
     }
@@ -378,12 +374,11 @@ export class UsersService {
 
   async usersFollowers(userId: number): Promise<UsersFollowersOutput> {
     try {
-      const user = await this.users.findOne({
-        where: { id: userId },
-        relations: ['followers'],
+      const followers = await this.follower.find({
+        where: { owner: { id: userId } },
       });
 
-      return { ok: true, followers: user.followers, msg: 'good work' };
+      return { ok: true, followers, msg: 'good work' };
     } catch (error) {
       return { ok: false, error, msg: '서버가 잠시 아픈거 같아요...' };
     }
@@ -512,12 +507,11 @@ export class UsersService {
         return { followsIdArr: [] };
       }
 
-      const user = await this.users.findOne({
-        where: { id: userId },
-        relations: ['follows'],
+      const follows = await this.follow.find({
+        where: { owner: { id: userId } },
       });
 
-      const followsIdArr = user.follows.map((user) => user.id);
+      const followsIdArr = follows.map((user) => user.follow.id);
 
       return { followsIdArr };
     } catch (error) {
@@ -527,9 +521,12 @@ export class UsersService {
 
   async myBlockedPosts(authUser: User): Promise<MyBlockedPostsOutput> {
     try {
+      if (!authUser) {
+        return { ok: true, myBlockedPosts: [], msg: 'good work!' };
+      }
       const user = await this.users.findOne({ where: { id: authUser.id } });
       if (!user) {
-        return { ok: false, myBlockedPosts: [], msg: 'good work!' };
+        return { ok: true, myBlockedPosts: [], msg: 'good work!' };
       }
 
       const myBlockedPosts = await this.userPostBlock.find({
@@ -547,6 +544,9 @@ export class UsersService {
     { postId }: ToggleUserPostBlockInput,
   ): Promise<CommonOutput> {
     try {
+      if (!authUser) {
+        return { ok: false, msg: '로그인 후 이용가능합니다.' };
+      }
       const user = await this.users.findOne({ where: { id: authUser.id } });
       if (!user) {
         return { ok: false, msg: '로그인 후 이용가능합니다.' };
@@ -570,8 +570,38 @@ export class UsersService {
     }
   }
 
-  async toggleUserBlock(authUser: User, userId: number): Promise<CommonOutput> {
+  async myBlockedUsers(authUser: User): Promise<MyBlockedUsersOutput> {
     try {
+      if (!authUser) {
+        return {
+          ok: false,
+          myBlockedUsers: [],
+          msg: '로그인 후 이용가능합니다.',
+        };
+      }
+      const user = await this.users.findOne({ where: { id: authUser.id } });
+      if (!user) {
+        return { ok: true, myBlockedUsers: [] };
+      }
+
+      const myBlockedUsers = await this.userBlock.find({
+        where: { owner: { id: authUser.id } },
+      });
+      console.log(myBlockedUsers, '@#@#');
+      return { ok: false, myBlockedUsers, msg: 'good work!' };
+    } catch (error) {
+      return { ok: false, error, msg: '서버가 잠시 아픈거 같아요...!' };
+    }
+  }
+
+  async toggleUserBlock(
+    authUser: User,
+    { userId }: ToggleUserBlockInput,
+  ): Promise<ToggleUserBlockOutput> {
+    try {
+      if (!authUser) {
+        return { ok: false, msg: '로그인 후 이용가능합니다.' };
+      }
       const user = await this.users.findOne({ where: { id: authUser.id } });
       if (!user) {
         return { ok: false, msg: '로그인 후 이용가능합니다.' };
@@ -580,8 +610,31 @@ export class UsersService {
       const userBlock = await this.userBlock.findOne({
         where: { owner: { id: authUser.id }, blockedUserId: userId },
       });
-
       if (!userBlock) {
+        const isMyFollow = await this.follow.findOne({
+          where: { owner: { id: authUser.id }, follow: { id: userId } },
+        });
+        if (isMyFollow) {
+          const targetsFollower = await this.follower.findOne({
+            where: { owner: { id: userId }, follower: { id: authUser.id } },
+          });
+
+          await this.follow.remove(isMyFollow);
+          await this.follower.remove(targetsFollower);
+        }
+
+        const isMyFollower = await this.follower.findOne({
+          where: { owner: { id: authUser.id }, follower: { id: userId } },
+        });
+        if (isMyFollower) {
+          const targetFollow = await this.follow.findOne({
+            where: { owner: { id: userId }, follow: { id: authUser.id } },
+          });
+
+          await this.follower.remove(isMyFollower);
+          await this.follow.remove(targetFollow);
+        }
+
         await this.userBlock.save(
           this.userBlock.create({ blockedUserId: userId, owner: authUser }),
         );

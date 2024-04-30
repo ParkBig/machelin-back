@@ -22,6 +22,8 @@ import { Bookmark } from 'src/bookmarks/entities/bookmark.entity';
 import { Stamp } from 'src/stamps/entities/stamp.entity';
 import { UserBlock } from './userBlock.entity';
 import { UserPostBlock } from './userPostBlock.entity';
+import { Follow } from './follow.entity';
+import { Follower } from './follower.entity';
 
 export enum UserRole {
   admin = 'ADMIN',
@@ -86,13 +88,11 @@ export class User {
   @Column('text', { array: true, default: [] })
   medalsEarned: string[];
 
-  @ManyToMany((type) => User)
-  @JoinTable()
-  follows: User[];
+  @OneToMany((type) => Follow, (follow) => follow.owner)
+  follows: Follow[];
 
-  @ManyToMany((type) => User)
-  @JoinTable()
-  followers: User[];
+  @OneToMany((type) => Follower, (follower) => follower.owner)
+  followers: Follower[];
 
   @OneToMany((type) => Post, (post) => post.owner)
   posts: Post[];

@@ -24,6 +24,8 @@ import { Stamp } from './stamps/entities/stamp.entity';
 import { VersionsModule } from './versions/versions.module';
 import { UserBlock } from './users/entities/userBlock.entity';
 import { UserPostBlock } from './users/entities/userPostBlock.entity';
+import { Follow } from './users/entities/follow.entity';
+import { Follower } from './users/entities/follower.entity';
 
 @Module({
   imports: [
@@ -81,6 +83,8 @@ import { UserPostBlock } from './users/entities/userPostBlock.entity';
         Stamp,
         UserPostBlock,
         UserBlock,
+        Follow,
+        Follower,
       ],
     }),
     JwtModule.forRoot({

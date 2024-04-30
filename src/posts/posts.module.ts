@@ -11,6 +11,7 @@ import { S3ServiceService } from 'src/s3-service/s3-service.service';
 import { GoogleApiService } from 'src/google-api/google-api.service';
 import { UsersModule } from 'src/users/users.module';
 import { UserPostBlock } from 'src/users/entities/userPostBlock.entity';
+import { UserBlock } from 'src/users/entities/userBlock.entity';
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { UserPostBlock } from 'src/users/entities/userPostBlock.entity';
       Dislike,
       Report,
       UserPostBlock,
+      UserBlock,
     ]),
     UsersModule,
   ],

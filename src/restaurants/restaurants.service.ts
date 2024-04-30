@@ -17,6 +17,7 @@ import {
   RestaurantsTextSearchOutput,
 } from './dtos/restaurants-text-search.dto';
 import { GoogleApiService } from 'src/google-api/google-api.service';
+import { User } from 'src/users/entities/user.entity';
 
 @Injectable()
 export class RestaurantsService {
@@ -86,13 +87,17 @@ export class RestaurantsService {
     }
   }
 
-  async restaurantPosts({
-    restaurantId,
-    page,
-  }: RestaurantPostsInput): Promise<RestaurantPostsOutput> {
+  async restaurantPosts(
+    authUser: User,
+    { restaurantId, page }: RestaurantPostsInput,
+  ): Promise<RestaurantPostsOutput> {
     try {
       const { restaurantPosts, nextPage } =
-        await this.postsService.findRestaurantPosts(restaurantId, page);
+        await this.postsService.findRestaurantPosts(
+          authUser,
+          restaurantId,
+          page,
+        );
 
       return {
         ok: true,
