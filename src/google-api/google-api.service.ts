@@ -14,6 +14,8 @@ import {
   ReverseGeocodingInput,
   ReverseGeocodingOutput,
 } from './dtos/reverse-geocoding.dto';
+import { GeocodingInput, GeocodingOutput } from './dtos/geocoding.dto';
+import { AutocompleteInput, AutocompleteOutput } from './dtos/autocomplete.dto';
 
 @Injectable()
 export class GoogleApiService {
@@ -22,6 +24,7 @@ export class GoogleApiService {
   private readonly detailSearchBaseUrl: string;
   private readonly textSearchBaseUrl: string;
   private readonly reverseGeocodingUrl: string;
+  private readonly autocompleteUrl: string;
 
   constructor(private readonly configService: ConfigService) {
     this.googleKey = this.configService.get('GOOGLE_KEY');
@@ -35,6 +38,7 @@ export class GoogleApiService {
     this.reverseGeocodingUrl = this.configService.get(
       'GOOGLE_REVERSE_GEOCODING_URL',
     );
+    this.autocompleteUrl = this.configService.get('GOOGLE_AUTOCOMPLETE_URL');
   }
 
   async nearbySearch({
@@ -144,6 +148,48 @@ export class GoogleApiService {
       const isKorea = localityArr[0] === '대한민국' ? true : false;
 
       return { ok: true, localityArr, isKorea, msg: 'good work' };
+    } catch (error) {
+      return { ok: false, error, msg: '서버가 잠시 아픈거 같아요...' };
+    }
+  }
+
+  async geocoding({
+    address,
+    language,
+  }: GeocodingInput): Promise<GeocodingOutput> {
+    try {
+      const params = {
+        address,
+        language,
+        key: this.googleKey,
+      };
+      const queryString = new URLSearchParams(params).toString();
+      const requestUrl = `${this.reverseGeocodingUrl}${queryString}`;
+      const response = await axios.get(requestUrl);
+      const geocoding = response.data.results;
+
+      return { ok: true, geocoding, msg: 'good work' };
+    } catch (error) {
+      return { ok: false, error, msg: '서버가 잠시 아픈거 같아요...' };
+    }
+  }
+
+  async autocomplete({
+    input,
+    language,
+  }: AutocompleteInput): Promise<AutocompleteOutput> {
+    try {
+      const params = {
+        input,
+        language,
+        key: this.googleKey,
+      };
+      const queryString = new URLSearchParams(params).toString();
+      const requestUrl = `${this.reverseGeocodingUrl}${queryString}`;
+      const response = await axios.get(requestUrl);
+      const predictions = response.data.predictions;
+
+      return { ok: true, predictions, msg: 'good work' };
     } catch (error) {
       return { ok: false, error, msg: '서버가 잠시 아픈거 같아요...' };
     }
