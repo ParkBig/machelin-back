@@ -185,7 +185,7 @@ export class GoogleApiService {
         key: this.googleKey,
       };
       const queryString = new URLSearchParams(params).toString();
-      const requestUrl = `${this.reverseGeocodingUrl}${queryString}`;
+      const requestUrl = `${this.autocompleteUrl}${queryString}`;
       const response = await axios.get(requestUrl);
       const predictions = response.data.predictions;
 
